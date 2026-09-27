@@ -27,8 +27,8 @@ export default async function LoginPage({ searchParams }: PageProps<"/vestuario/
             <p className="font-semibold">Modo demo</p>
             <p className="mt-1 text-mist">
               El sitio está usando datos de ejemplo. Para usar el panel, configurá las variables de Supabase
-              (<code className="text-cedar-soft">NEXT_PUBLIC_SUPABASE_URL</code> y{" "}
-              <code className="text-cedar-soft">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>) como indica el README.
+              (<code className="text-cedar-soft">SUPABASE_URL</code> y{" "}
+              <code className="text-cedar-soft">SUPABASE_ANON_KEY</code>) como indica el README.
             </p>
           </div>
         ) : (

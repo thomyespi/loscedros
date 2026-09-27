@@ -1,18 +1,25 @@
 import type { NextConfig } from "next";
 import { ADMIN_BASE_PATH } from "./lib/admin-path";
+import { STORAGE_BUCKETS, STORAGE_PATH } from "./lib/config";
 
-const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
-  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
-  : "*.supabase.co";
+const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
+const buckets = Object.values(STORAGE_BUCKETS).join("|");
 
 const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [60, 75, 90],
-    remotePatterns: [
-      { protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" },
-      { protocol: "http", hostname: "127.0.0.1", pathname: "/storage/v1/object/public/**" },
-    ],
+  },
+  // Imágenes de Storage: se piden como /storage/<bucket>/<ruta> y se reescriben a Supabase,
+  // así el navegador nunca necesita la URL del proyecto.
+  async rewrites() {
+    if (!supabaseUrl) return [];
+    return [
+      {
+        source: `${STORAGE_PATH}/:bucket(${buckets})/:path*`,
+        destination: `${supabaseUrl}/storage/v1/object/public/:bucket/:path*`,
+      },
+    ];
   },
   async headers() {
     return [

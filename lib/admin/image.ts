@@ -2,7 +2,7 @@
 
 import imageCompression from "browser-image-compression";
 import { STORAGE_BUCKETS } from "@/lib/config";
-import { createClient } from "@/lib/supabase/browser";
+import { uploadImageAction } from "@/lib/admin/upload";
 
 export interface PixelArea {
   x: number;
@@ -55,16 +55,13 @@ export async function compressPhoto(file: File, maxSide = 1920) {
 
 export const ACCEPTED_IMAGES = "image/jpeg,image/png,image/webp,image/heic,image/heif";
 
-function randomId() {
-  return Math.random().toString(36).slice(2, 10);
-}
-
-/** Sube un blob al bucket con la sesión del admin y devuelve la ruta guardada. */
+/** Sube un blob al bucket (vía server action, con la sesión del admin) y devuelve la ruta guardada. */
 export async function uploadImage(bucket: keyof typeof STORAGE_BUCKETS, folder: string, blob: Blob) {
-  const path = `${folder}/${Date.now()}-${randomId()}.webp`;
-  const { error } = await createClient()
-    .storage.from(STORAGE_BUCKETS[bucket])
-    .upload(path, blob, { contentType: "image/webp", cacheControl: "31536000", upsert: false });
-  if (error) throw new Error("No se pudo subir la imagen. Revisá tu conexión e intentá de nuevo.");
-  return path;
+  const form = new FormData();
+  form.set("bucket", bucket);
+  form.set("folder", folder);
+  form.set("file", new File([blob], "image.webp", { type: "image/webp" }));
+  const result = await uploadImageAction(form).catch(() => null);
+  if (!result?.ok) throw new Error(result?.error ?? "No se pudo subir la imagen. Revisá tu conexión e intentá de nuevo.");
+  return result.data.path;
 }

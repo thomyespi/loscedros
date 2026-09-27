@@ -3,7 +3,7 @@
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/browser";
+import { signIn } from "@/app/vestuario/ingresar/actions";
 import { inputClass } from "./ui";
 
 export function LoginForm({ next }: { next: string }) {
@@ -18,10 +18,9 @@ export function LoginForm({ next }: { next: string }) {
     e.preventDefault();
     setPending(true);
     setError(null);
-    const { error } = await createClient().auth.signInWithPassword({ email: email.trim(), password });
-    if (error) {
-      // Mensaje genérico: no revelamos si falló el email o la contraseña.
-      setError("Email o contraseña incorrectos");
+    const result = await signIn({ email, password }).catch(() => null);
+    if (!result?.ok) {
+      setError(result?.error ?? "No se pudo ingresar. Revisá tu conexión e intentá de nuevo.");
       setPending(false);
       return;
     }

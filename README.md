@@ -41,9 +41,9 @@ Abrí <http://localhost:3000>.
    ```
 7. Copiá las claves en Project Settings → API y creá el archivo `.env.local` (tomá `.env.example` como base):
    ```bash
-   NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-   NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   SUPABASE_URL=https://xxxx.supabase.co
+   SUPABASE_ANON_KEY=eyJ...
+   SITE_URL=http://localhost:3000
    CRON_SECRET=un-texto-largo-y-secreto
    ```
 8. En Authentication → URL Configuration, poné la **Site URL** (en local: `http://localhost:3000`; en producción: tu dominio).
@@ -75,14 +75,14 @@ Abrí <http://localhost:3000>.
 ## 4. Deploy en Vercel
 
 1. Subí el repo a GitHub e importalo en <https://vercel.com/new>.
-2. En *Environment Variables* cargá las 4 variables del paso 2.7 (con `NEXT_PUBLIC_SITE_URL` = la URL final).
+2. En *Environment Variables* cargá las 4 variables del paso 2.7 (con `SITE_URL` = la URL final).
 3. Deploy. `vercel.json` ya configura:
    - Región **pdx1 (Portland)**, al lado de la base de Supabase (us-west-2), para que las consultas sean rápidas.
    - Un **cron semanal** (`/api/keep-alive`) que evita que Supabase pause el proyecto en el plan gratuito por inactividad.
 
 ### Dominio propio (cuando lo compres)
 1. Vercel → Project → Settings → Domains → agregá el dominio y seguí las instrucciones de DNS.
-2. Actualizá `NEXT_PUBLIC_SITE_URL` en Vercel y la **Site URL** de Supabase Auth con el dominio nuevo. Redeploy.
+2. Actualizá `SITE_URL` en Vercel y la **Site URL** de Supabase Auth con el dominio nuevo. Redeploy.
 
 ---
 

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   }
   if (IS_DEMO) return NextResponse.json({ ok: true, demo: true });
 
-  const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  const db = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!, {
     auth: { persistSession: false },
     global: { fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }) },
   });
