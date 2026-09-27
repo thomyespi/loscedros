@@ -2,8 +2,7 @@ export type WhatsAppContext =
   | { kind: "reserva" }
   | { kind: "consulta" }
   | { kind: "torneo"; tournamentName: string }
-  | { kind: "torneos" }
-  | { kind: "eventos" };
+  | { kind: "torneos" };
 
 export function whatsappMessage(ctx: WhatsAppContext) {
   switch (ctx.kind) {
@@ -15,8 +14,6 @@ export function whatsappMessage(ctx: WhatsAppContext) {
       return `¡Hola Los Cedros! Quiero consultar por el torneo "${ctx.tournamentName}". `;
     case "torneos":
       return "¡Hola Los Cedros! Quiero info sobre los próximos torneos: ¿cómo anoto a mi equipo?";
-    case "eventos":
-      return "¡Hola Los Cedros! Quiero organizar un evento/salida grupal (cumple, empresa, amigos). Seríamos ___ personas, para el ___.";
   }
 }
 

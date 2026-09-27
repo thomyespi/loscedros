@@ -81,14 +81,6 @@ export const scoring = {
   text: "En cada fecha los equipos se enfrentan en un cruce que tiene las 3 modalidades. Cada modalidad ganada suma 3 puntos. No hay empates: siempre gana alguien.",
 };
 
-export const events = {
-  eyebrow: "Eventos y grupos",
-  title: "Tu próximo plan es acá",
-  description:
-    "Cumpleaños, salidas de empresa, despedidas, colegios o simplemente una juntada distinta. Armamos la experiencia para tu grupo.",
-  items: ["Cumpleaños", "Empresas y team building", "Despedidas", "Colegios y clubes", "Grupos de amigos"],
-};
-
 export const faq: { q: string; a: string }[] = [
   {
     q: "¿Tengo que saber jugar al fútbol?",
@@ -121,9 +113,5 @@ export const faq: { q: string; a: string }[] = [
   {
     q: "¿Qué pasa si llueve?",
     a: "Si el clima no acompaña, consultanos por WhatsApp ese mismo día. Las fechas de torneo suspendidas se reprograman.",
-  },
-  {
-    q: "¿Organizan eventos privados?",
-    a: "Sí: cumpleaños, empresas, colegios y grupos. Escribinos y armamos una propuesta a medida.",
   },
 ];

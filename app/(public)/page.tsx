@@ -1,14 +1,11 @@
 import { Club } from "@/components/landing/club";
+import { Competition } from "@/components/landing/competition";
 import { Course } from "@/components/landing/course";
-import { Events } from "@/components/landing/events";
 import { Faq } from "@/components/landing/faq";
 import { Gallery, type GalleryItem } from "@/components/landing/gallery";
 import { Hero } from "@/components/landing/hero";
 import { Location } from "@/components/landing/location";
 import { Marquee } from "@/components/landing/marquee";
-import { Modalities } from "@/components/landing/modalities";
-import { RankingTop } from "@/components/landing/ranking-top";
-import { Spotlight } from "@/components/landing/spotlight";
 import { WhatIs } from "@/components/landing/what-is";
 import { placeholderGallery } from "@/content/media";
 import { SITE_URL } from "@/lib/config";
@@ -51,16 +48,13 @@ export default async function HomePage() {
     <>
       <Hero whatsapp={settings.whatsapp} openingHours={settings.openingHours} spotlight={spotlight} />
       <Marquee />
-      <Spotlight spotlight={spotlight} />
       <WhatIs />
       <Club stats={{ teams: historical.length, tournaments: snap.tournaments.length }} />
       <Course openingHours={settings.openingHours} />
-      <Modalities />
-      <RankingTop rows={historical} teamById={teamMap(snap)} />
-      <Events whatsapp={settings.whatsapp} />
       <Gallery items={gallery} instagram={settings.instagram} instagramHref={instagramUrl(settings.instagram)} />
       <Location settings={settings} />
       <Faq whatsapp={settings.whatsapp} />
+      <Competition spotlight={spotlight} historical={historical} teamById={teamMap(snap)} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     </>
   );

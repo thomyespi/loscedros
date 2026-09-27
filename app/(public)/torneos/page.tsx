@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Trophy } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { PageHeader } from "@/components/page-header";
+import { Modalities } from "@/components/tournament/modalities";
 import { TournamentCard } from "@/components/tournament/tournament-card";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { buildTournamentView, groupTournaments, type TournamentView } from "@/lib/data/selectors";
@@ -60,6 +61,8 @@ export default async function TournamentsPage() {
             </section>
           ))
         )}
+
+        <Modalities />
 
         {sections.length > 0 && (
           <Reveal className="flex flex-col items-start gap-4 rounded-3xl border border-grass/25 bg-grass/5 p-6 sm:flex-row sm:items-center sm:justify-between">

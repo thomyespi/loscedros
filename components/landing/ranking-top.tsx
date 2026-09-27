@@ -2,31 +2,35 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { TrophyIcon } from "@/components/brand/icons";
 import { Reveal } from "@/components/motion/reveal";
-import { SectionHeading } from "@/components/section-heading";
+import { Eyebrow } from "@/components/section-heading";
 import { TeamAvatar } from "@/components/team-avatar";
 import { podium } from "@/components/tournament/podium-colors";
 import type { Team } from "@/lib/domain/types";
 import type { HistoricalRow } from "@/lib/standings/historical";
 import { cn } from "@/lib/utils";
 
-export function RankingTop({ rows, teamById }: { rows: HistoricalRow[]; teamById: Map<string, Team> }) {
-  const top = rows.filter((r) => r.points > 0 || r.titles > 0).slice(0, 5);
-  if (top.length === 0) return null;
+/** Mínimo de equipos con puntos o títulos para que el top del ranking diga algo. */
+export const MIN_RANKED_TEAMS = 3;
+
+/** Top 5 del ranking histórico, o vacío si no llega a {@link MIN_RANKED_TEAMS}. */
+export function rankingTop(rows: HistoricalRow[]): HistoricalRow[] {
+  const ranked = rows.filter((r) => r.points > 0 || r.titles > 0);
+  return ranked.length >= MIN_RANKED_TEAMS ? ranked.slice(0, 5) : [];
+}
+
+/** Top del ranking histórico dentro de la sección Competencia. Recibe filas ya filtradas por {@link rankingTop}. */
+export function RankingTop({ top, teamById }: { top: HistoricalRow[]; teamById: Map<string, Team> }) {
   const max = Math.max(...top.map((r) => r.points), 1);
 
   return (
-    <section id="ranking" className="container-page scroll-mt-24 py-20 sm:py-28">
-      <SectionHeading
-        eyebrow="Ranking histórico"
-        title="Los que mandan"
-        description="Puntos acumulados en todos los torneos desde el primero. ¿Tu equipo está en el top?"
-        action={
-          <Link href="/ranking" className="group hidden items-center gap-2 font-semibold text-grass sm:inline-flex">
-            Ver ranking completo <ArrowRight className="size-4 transition group-hover:translate-x-1" />
-          </Link>
-        }
-      />
-      <ol className="mt-10 flex flex-col gap-2">
+    <div className="flex flex-col">
+      <Reveal className="flex items-center justify-between gap-3">
+        <Eyebrow>Ranking histórico</Eyebrow>
+        <Link href="/ranking" className="group hidden items-center gap-2 text-sm font-semibold text-grass sm:inline-flex">
+          Ver completo <ArrowRight className="size-4 transition group-hover:translate-x-1" />
+        </Link>
+      </Reveal>
+      <ol className="mt-4 flex flex-col gap-2">
         {top.map((row, i) => {
           const team = teamById.get(row.teamId)!;
           const p = podium(row.position);
@@ -68,10 +72,10 @@ export function RankingTop({ rows, teamById }: { rows: HistoricalRow[]; teamById
       </ol>
       <Link
         href="/ranking"
-        className="mt-6 flex h-12 items-center justify-center gap-2 rounded-full border border-white/15 font-semibold text-chalk sm:hidden"
+        className="mt-4 flex h-12 items-center justify-center gap-2 rounded-full border border-white/15 font-semibold text-chalk sm:hidden"
       >
         Ver ranking completo <ArrowRight className="size-4" />
       </Link>
-    </section>
+    </div>
   );
 }
