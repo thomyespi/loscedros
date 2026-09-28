@@ -2,7 +2,7 @@
 
 import { Archive, ArchiveRestore, ChevronRight, Loader2, Plus, Search, Shield, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   createTeam,
@@ -12,7 +12,7 @@ import {
   setTeamAvatar,
 } from "@/app/vestuario/(panel)/equipos/actions";
 import { TeamAvatar } from "@/components/team-avatar";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { uploadImage } from "@/lib/admin/image";
 import { cn } from "@/lib/utils";
 import { AvatarPicker } from "./avatar-picker";
@@ -116,7 +116,7 @@ export function TeamsManager({ teams, openNew }: { teams: AdminTeam[]; openNew: 
         <Plus className="size-7" />
       </button>
 
-      <TeamSheet
+      <TeamDialog
         key={editing === "new" ? "new" : (editing?.id ?? "none")}
         team={editing}
         onClose={() => setEditing(null)}
@@ -129,57 +129,61 @@ export function TeamsManager({ teams, openNew }: { teams: AdminTeam[]; openNew: 
   );
 }
 
-function TeamSheet({ team, onClose, onSaved }: { team: AdminTeam | "new" | null; onClose: () => void; onSaved: () => void }) {
+function TeamDialog({ team, onClose, onSaved }: { team: AdminTeam | "new" | null; onClose: () => void; onSaved: () => void }) {
   const isNew = team === "new";
   const current = team && team !== "new" ? team : null;
   const [name, setName] = useState(current?.name ?? "");
   const [avatar, setAvatar] = useState<{ blob: Blob; preview: string } | null>(null);
   const [removeAvatar, setRemoveAvatar] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  // Todo lo que guarda corre en una transición: el diálogo queda con el spinner
+  // hasta que la lista ya se actualizó (router.refresh) y recién ahí se cierra.
+  const [saving, startTransition] = useTransition();
   const [confirm, setConfirm] = useState<"delete" | null>(null);
+  const finish = () => startTransition(onSaved);
 
   useEffect(() => () => {
     if (avatar) URL.revokeObjectURL(avatar.preview);
   }, [avatar]);
 
-  async function save(e: React.FormEvent) {
+  function save(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
     setError(null);
-    try {
-      let id = current?.id;
-      if (isNew) {
-        const res = await createTeam({ name });
-        if (!res.ok) return setError(res.error);
-        id = res.data.id;
-      } else if (current && name.trim() !== current.name) {
-        const res = await renameTeam(current.id, { name });
-        if (!res.ok) return setError(res.error);
+    startTransition(async () => {
+      try {
+        let id = current?.id;
+        if (isNew) {
+          const res = await createTeam({ name });
+          if (!res.ok) return setError(res.error);
+          id = res.data.id;
+        } else if (current && name.trim() !== current.name) {
+          const res = await renameTeam(current.id, { name });
+          if (!res.ok) return setError(res.error);
+        }
+        if (id && avatar) {
+          const path = await uploadImage("avatars", `teams/${id}`, avatar.blob);
+          const res = await setTeamAvatar(id, path);
+          if (!res.ok) throw new Error(res.error);
+        } else if (id && removeAvatar && current?.avatarPath) {
+          const res = await setTeamAvatar(id, null);
+          if (!res.ok) throw new Error(res.error);
+        }
+        toast.success(isNew ? "Equipo creado" : "Cambios guardados");
+        finish();
+      } catch (err) {
+        toast.error((err as Error).message);
       }
-      if (id && avatar) {
-        const path = await uploadImage("avatars", `teams/${id}`, avatar.blob);
-        const res = await setTeamAvatar(id, path);
-        if (!res.ok) throw new Error(res.error);
-      } else if (id && removeAvatar && current?.avatarPath) {
-        const res = await setTeamAvatar(id, null);
-        if (!res.ok) throw new Error(res.error);
-      }
-      toast.success(isNew ? "Equipo creado" : "Cambios guardados");
-      onSaved();
-    } catch (err) {
-      toast.error((err as Error).message);
-    } finally {
-      setSaving(false);
-    }
+    });
   }
 
-  async function toggleArchive() {
+  function toggleArchive() {
     if (!current) return;
-    const res = await setTeamArchived(current.id, !current.archivedAt);
-    if (!res.ok) return toast.error(res.error);
-    toast.success(current.archivedAt ? "Equipo restaurado" : "Equipo archivado");
-    onSaved();
+    startTransition(async () => {
+      const res = await setTeamArchived(current.id, !current.archivedAt);
+      if (!res.ok) return void toast.error(res.error);
+      toast.success(current.archivedAt ? "Equipo restaurado" : "Equipo archivado");
+      finish();
+    });
   }
 
   async function remove() {
@@ -191,17 +195,18 @@ function TeamSheet({ team, onClose, onSaved }: { team: AdminTeam | "new" | null;
       return;
     }
     toast.success("Equipo borrado");
-    onSaved();
+    setConfirm(null);
+    finish();
   }
 
   return (
-    <Sheet open={team !== null} onOpenChange={(o) => !o && !saving && onClose()}>
-      <SheetContent side="bottom" className="max-h-[92dvh] overflow-y-auto rounded-t-3xl border-white/10 bg-night sm:mx-auto sm:max-w-lg">
-        <SheetHeader>
-          <SheetTitle className="font-display text-3xl text-chalk">{isNew ? "Nuevo equipo" : "Editar equipo"}</SheetTitle>
-          <SheetDescription>Nombre y, si querés, una imagen.</SheetDescription>
-        </SheetHeader>
-        <form onSubmit={save} className="flex flex-col gap-5 px-4 pb-[calc(1.5rem+var(--safe-bottom))]">
+    <Dialog open={team !== null} onOpenChange={(o) => !o && !saving && onClose()}>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto rounded-3xl border border-white/10 bg-night p-5 sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="font-display text-3xl text-chalk">{isNew ? "Nuevo equipo" : "Editar equipo"}</DialogTitle>
+          <DialogDescription>Nombre y, si querés, una imagen.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={save} className="flex flex-col gap-5">
           <AvatarPicker
             name={name}
             currentPath={removeAvatar ? null : (current?.avatarPath ?? null)}
@@ -235,7 +240,7 @@ function TeamSheet({ team, onClose, onSaved }: { team: AdminTeam | "new" | null;
           {current && (
             <div className="flex flex-col gap-2 border-t border-white/10 pt-4">
               <button type="button" className={btn.secondary} onClick={toggleArchive} disabled={saving}>
-                {current.archivedAt ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}
+                {saving ? <Loader2 className="size-4 animate-spin" /> : current.archivedAt ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}
                 {current.archivedAt ? "Restaurar equipo" : "Archivar equipo"}
               </button>
               {current.tournaments === 0 ? (
@@ -260,7 +265,7 @@ function TeamSheet({ team, onClose, onSaved }: { team: AdminTeam | "new" | null;
           destructive
           onConfirm={remove}
         />
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

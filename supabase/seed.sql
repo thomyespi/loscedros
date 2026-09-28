@@ -15,10 +15,11 @@ insert into public.teams (id, name, slug, avatar_path, archived_at, created_at) 
   ('00000000-0000-4000-8000-a00000000008', 'Tiro Libre', 'tiro-libre', null, null, '2026-02-01T12:00:00.000Z'),
   ('00000000-0000-4000-8000-a00000000009', 'Los Veteranos', 'los-veteranos', null, null, '2026-02-01T12:00:00.000Z');
 
--- Los torneos finalizados se insertan en curso y se cierran al final (el campeón debe estar inscripto).
+-- Los torneos en juego y finalizados se insertan como próximos y cambian de estado al final:
+-- para arrancar hacen falta cruces en la Fecha 1, y para finalizar todos los resultados.
 insert into public.tournaments (id, name, slug, description, status, created_at) values
-  ('00000000-0000-4000-8000-b00000000001', 'Apertura 2026', 'apertura-2026', 'El primer torneo del año en Los Cedros. Seis equipos, tres fechas y la gloria de levantar la primera copa.', 'en_curso', '2026-02-01T12:00:00.000Z'),
-  ('00000000-0000-4000-8000-b00000000002', 'Clausura 2026', 'clausura-2026', 'Ocho equipos, cuatro fechas y todo por definirse. ¿Quién se queda con el Clausura?', 'en_curso', '2026-03-01T12:00:00.000Z'),
+  ('00000000-0000-4000-8000-b00000000001', 'Apertura 2026', 'apertura-2026', 'El primer torneo del año en Los Cedros. Seis equipos, tres fechas y la gloria de levantar la primera copa.', 'proximo', '2026-02-01T12:00:00.000Z'),
+  ('00000000-0000-4000-8000-b00000000002', 'Clausura 2026', 'clausura-2026', 'Ocho equipos, cuatro fechas y todo por definirse. ¿Quién se queda con el Clausura?', 'proximo', '2026-03-01T12:00:00.000Z'),
   ('00000000-0000-4000-8000-b00000000003', 'Copa Primavera 2026', 'copa-primavera-2026', 'Un torneo corto de dos fechas para cerrar el año a puro footgolf.', 'proximo', '2026-04-01T12:00:00.000Z'),
   ('00000000-0000-4000-8000-b00000000004', 'Verano 2027', 'verano-2027', 'Borrador: todavía no es público.', 'borrador', '2026-05-01T12:00:00.000Z');
 
@@ -131,6 +132,7 @@ insert into public.match_results (match_id, modality, winner_team_id, score_note
   ('00000000-0000-4000-8000-d00000000011', 'individual', '00000000-0000-4000-8000-a00000000003', '3&2'),
   ('00000000-0000-4000-8000-d00000000011', 'four_ball', '00000000-0000-4000-8000-a00000000003', null);
 
+update public.tournaments set status = 'en_curso' where id = '00000000-0000-4000-8000-b00000000002';
 update public.tournaments set status = 'finalizado', champion_team_id = '00000000-0000-4000-8000-a00000000002', finished_at = '2026-05-23T21:00:00.000Z' where id = '00000000-0000-4000-8000-b00000000001';
 update public.teams set archived_at = '2026-06-01T12:00:00.000Z' where id = '00000000-0000-4000-8000-a00000000009';
 

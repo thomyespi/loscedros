@@ -3,13 +3,23 @@
 import { Menu } from "@base-ui/react/menu";
 import { ChevronDown, Trophy } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { LinkPendingSpinner } from "./link-pending";
 import { COMPETITION_LINKS } from "./nav-links";
 
 /** Botón "Competencias" del header: despliega Torneos y Ranking. */
 export function CompetitionMenu({ active, pathname }: { active: boolean; pathname: string }) {
+  // El menú queda abierto (con el spinner del link tocado) hasta que cambia la ruta.
+  const [open, setOpen] = useState(false);
+  const [lastPath, setLastPath] = useState(pathname);
+  if (lastPath !== pathname) {
+    setLastPath(pathname);
+    setOpen(false);
+  }
+
   return (
-    <Menu.Root>
+    <Menu.Root open={open} onOpenChange={setOpen}>
       <Menu.Trigger
         className={cn(
           "group inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm whitespace-nowrap font-semibold transition-colors outline-none focus-visible:ring-3 focus-visible:ring-grass/50",
@@ -30,7 +40,7 @@ export function CompetitionMenu({ active, pathname }: { active: boolean; pathnam
               return (
                 <Menu.LinkItem
                   key={link.href}
-                  closeOnClick
+                  closeOnClick={current}
                   render={<Link href={link.href} />}
                   aria-current={current ? "page" : undefined}
                   className={cn(
@@ -38,7 +48,10 @@ export function CompetitionMenu({ active, pathname }: { active: boolean; pathnam
                     current && "bg-grass/10",
                   )}
                 >
-                  <span className={cn("text-sm font-semibold", current ? "text-grass" : "text-chalk")}>{link.label}</span>
+                  <span className={cn("flex items-center justify-between gap-2 text-sm font-semibold", current ? "text-grass" : "text-chalk")}>
+                    {link.label}
+                    <LinkPendingSpinner />
+                  </span>
                   <span className="text-xs text-mist">{link.description}</span>
                 </Menu.LinkItem>
               );

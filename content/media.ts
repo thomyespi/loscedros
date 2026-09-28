@@ -1,6 +1,8 @@
 /**
- * Imágenes de muestra (Wikimedia Commons). Reemplazalas por fotos reales del club:
- * poné los archivos en /public/fotos/ y cambiá `src` acá. Nada más hay que tocar.
+ * Índice único de las imágenes de la landing. Los archivos viven en /public/landing/
+ * y son parte del sitio (no de la base). Para cambiar una: reemplazá el archivo con el
+ * mismo nombre, o cambiá acá `file`, dimensiones y `alt`. Las fotos propias del club
+ * van sin `credit`; /creditos lista solo las que lo tienen.
  */
 export interface SiteImage {
   src: string;
@@ -15,8 +17,8 @@ const img = (
   width: number,
   height: number,
   alt: string,
-  credit: SiteImage["credit"],
-): SiteImage => ({ src: `/placeholder/${file}`, width, height, alt, credit });
+  credit?: SiteImage["credit"],
+): SiteImage => ({ src: `/landing/${file}`, width, height, alt, credit });
 
 export const media = {
   hero: img("hero.webp", 1920, 1278, "Jugador de footgolf pateando hacia el green", {
@@ -81,8 +83,8 @@ export const media = {
   }),
 } satisfies Record<string, SiteImage>;
 
-/** Galería de la landing cuando todavía no se subieron fotos de torneos. */
-export const placeholderGallery: SiteImage[] = [
+/** Galería de la landing (siempre imágenes del sitio, nunca fotos de la base). */
+export const landingGallery: SiteImage[] = [
   media.greenGolden,
   media.teamGroup,
   media.teeShot,
@@ -93,6 +95,6 @@ export const placeholderGallery: SiteImage[] = [
   media.flag9,
 ];
 
-export const allCredits = Object.values(media)
-  .map((m) => ({ file: m.src, ...m.credit! }))
-  .filter((c) => c.title);
+export const allCredits = Object.values(media).flatMap((m) =>
+  m.credit ? [{ file: m.src, ...m.credit }] : [],
+);

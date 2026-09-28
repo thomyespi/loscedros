@@ -71,9 +71,12 @@ function PairingBuilder({ roundId, free, previousMeetings }: { roundId: string; 
         return;
       }
       toast.success(`${a.name} vs ${b.name}`);
-      setFirst(null);
-      setPendingPair(null);
-      router.refresh();
+      // Sigue pendiente hasta que el cruce nuevo ya está en pantalla.
+      startTransition(() => {
+        setFirst(null);
+        setPendingPair(null);
+        router.refresh();
+      });
     });
   }
 
@@ -155,7 +158,9 @@ function PairingBuilder({ roundId, free, previousMeetings }: { roundId: string; 
 function MatchEditor({ match, locked }: { match: AdminMatch; locked: boolean }) {
   const router = useRouter();
   const [results, setResults] = useState(match.results);
-  const [saving, setSaving] = useState<Modality | null>(null);
+  const [savingModality, setSavingModality] = useState<Modality | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const saving = isPending ? savingModality : null;
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Si el servidor trae datos nuevos (router.refresh), sincronizamos durante el render.
@@ -169,7 +174,7 @@ function MatchEditor({ match, locked }: { match: AdminMatch; locked: boolean }) 
   const bWins = MODALITIES.filter((m) => results[m]?.winnerTeamId === match.teamB.id).length;
   const complete = MODALITIES.every((m) => results[m]);
 
-  async function save(modality: Modality, winnerTeamId: string | null, scoreNote: string | null) {
+  function save(modality: Modality, winnerTeamId: string | null, scoreNote: string | null) {
     const previous = results;
     setResults((r) => {
       const next = { ...r };
@@ -177,16 +182,18 @@ function MatchEditor({ match, locked }: { match: AdminMatch; locked: boolean }) 
       else delete next[modality];
       return next;
     });
-    setSaving(modality);
-    const res = await setResult({ matchId: match.id, modality, winnerTeamId, scoreNote });
-    setSaving(null);
-    if (!res.ok) {
-      setResults(previous);
-      toast.error(res.error);
-      return;
-    }
-    toast.success(winnerTeamId ? `${MODALITY_LABEL[modality]}: guardado` : `${MODALITY_LABEL[modality]}: borrado`, { duration: 1200 });
-    router.refresh();
+    setSavingModality(modality);
+    // En transición: el spinner y el bloqueo duran hasta que termina el refresh.
+    startTransition(async () => {
+      const res = await setResult({ matchId: match.id, modality, winnerTeamId, scoreNote });
+      if (!res.ok) {
+        setResults(previous);
+        toast.error(res.error);
+        return;
+      }
+      toast.success(winnerTeamId ? `${MODALITY_LABEL[modality]}: guardado` : `${MODALITY_LABEL[modality]}: borrado`, { duration: 1200 });
+      startTransition(() => router.refresh());
+    });
   }
 
   const side = (team: MiniTeam, wins: number) => (
@@ -227,8 +234,8 @@ function MatchEditor({ match, locked }: { match: AdminMatch; locked: boolean }) 
 
       {!locked && (
         <div className="border-t border-white/5 px-4 py-2">
-          <button type="button" className={cn(btn.ghost, "h-10 px-2 text-sm hover:text-destructive")} onClick={() => setConfirmDelete(true)}>
-            <Trash2 className="size-4" /> Borrar cruce
+          <button type="button" className={cn(btn.ghost, "h-10 px-2 text-sm hover:text-destructive")} onClick={() => setConfirmDelete(true)} disabled={isPending}>
+            {isPending && !saving ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />} Borrar cruce
           </button>
         </div>
       )}
@@ -248,7 +255,7 @@ function MatchEditor({ match, locked }: { match: AdminMatch; locked: boolean }) 
           if (!res.ok) return void toast.error(res.error);
           toast.success("Cruce borrado");
           setConfirmDelete(false);
-          router.refresh();
+          startTransition(() => router.refresh());
         }}
       />
     </article>

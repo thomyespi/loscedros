@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { saveSettings } from "@/app/vestuario/(panel)/club/actions";
 import type { SiteSettings } from "@/lib/domain/types";
@@ -16,12 +16,12 @@ export function SettingsForm({ initial }: { initial: SiteSettings }) {
   const router = useRouter();
   const [values, setValues] = useState(initial);
   const [errors, setErrors] = useState<Errors>({});
-  const [saving, setSaving] = useState(false);
+  const [saving, startTransition] = useTransition();
   const dirty = (Object.keys(initial) as (keyof SiteSettings)[]).some((k) => values[k] !== initial[k]);
 
   const set = (k: keyof SiteSettings) => (e: React.ChangeEvent<HTMLInputElement>) => setValues((v) => ({ ...v, [k]: e.target.value }));
 
-  async function submit(e: React.FormEvent) {
+  function submit(e: React.FormEvent) {
     e.preventDefault();
     const parsed = settingsSchema.safeParse(values);
     if (!parsed.success) {
@@ -31,13 +31,16 @@ export function SettingsForm({ initial }: { initial: SiteSettings }) {
       return;
     }
     setErrors({});
-    setSaving(true);
-    const res = await saveSettings(values);
-    setSaving(false);
-    if (!res.ok) return void toast.error(res.error);
-    toast.success("Datos del club guardados");
-    setValues(parsed.data);
-    router.refresh();
+    // En transición: "Guardar" queda con el spinner hasta que termina el refresh.
+    startTransition(async () => {
+      const res = await saveSettings(values);
+      if (!res.ok) return void toast.error(res.error);
+      toast.success("Datos del club guardados");
+      startTransition(() => {
+        setValues(parsed.data);
+        router.refresh();
+      });
+    });
   }
 
   const digits = values.whatsapp.replace(/\D/g, "");

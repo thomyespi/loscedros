@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Trophy } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
+import { CompetitionTabs } from "@/components/layout/competition-tabs";
 import { PageHeader } from "@/components/page-header";
 import { Modalities } from "@/components/tournament/modalities";
 import { TournamentCard } from "@/components/tournament/tournament-card";
@@ -27,6 +28,7 @@ export default async function TournamentsPage() {
   return (
     <>
       <PageHeader
+        top={<CompetitionTabs />}
         eyebrow="Competencia"
         title="Torneos"
         description="Equipos amateur, tres modalidades por cruce y cada punto cuenta. Seguí la tabla y los resultados de cada fecha."

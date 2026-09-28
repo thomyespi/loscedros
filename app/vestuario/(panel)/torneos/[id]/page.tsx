@@ -6,6 +6,7 @@ import { getAdminSnapshot } from "@/lib/admin/data";
 import { ADMIN_BASE_PATH } from "@/lib/admin-path";
 import { buildTournamentView } from "@/lib/data/selectors";
 import { formatRange } from "@/lib/dates";
+import { tournamentReadiness } from "@/lib/domain/readiness";
 
 export const metadata: Metadata = { title: "Torneo" };
 
@@ -20,6 +21,12 @@ export default async function AdminTournamentPage({ params }: PageProps<"/vestua
   for (const r of view.rounds)
     for (const m of r.matches) for (const tid of [m.match.teamAId, m.match.teamBId]) matchesPerTeam.set(tid, (matchesPerTeam.get(tid) ?? 0) + 1);
 
+  const readiness = tournamentReadiness({
+    rounds: view.rounds.map((r) => r.round),
+    matches: view.rounds.flatMap((r) => r.matches.map((m) => m.match)),
+    results: view.rounds.flatMap((r) => r.matches.flatMap((m) => m.results)),
+  });
+
   const enrolled = new Set(tournament.teamIds);
   const data: AdminTournamentData = {
     id: tournament.id,
@@ -29,7 +36,8 @@ export default async function AdminTournamentPage({ params }: PageProps<"/vestua
     coverPath: tournament.coverPath,
     status: tournament.status,
     championName: view.champion?.name ?? null,
-    pendingMatches: view.pendingMatches,
+    startIssue: readiness.startIssue,
+    finishIssue: readiness.finishIssue,
     totalMatches: view.rounds.reduce((n, r) => n + r.matches.length, 0),
     teams: view.teams.map((t) => ({ id: t.id, name: t.name, avatarPath: t.avatarPath, matches: matchesPerTeam.get(t.id) ?? 0 })),
     availableTeams: snap.teams.filter((t) => !t.archivedAt && !enrolled.has(t.id)).map(({ id, name, avatarPath }) => ({ id, name, avatarPath })),

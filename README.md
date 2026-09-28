@@ -92,11 +92,33 @@ Abrí <http://localhost:3000>.
 | --- | --- |
 | Horarios, WhatsApp, Instagram, dirección | Panel → **Club** (sin tocar código) |
 | Textos de la landing (club, cancha, FAQ, modalidades, eventos) | `content/landing.ts` |
-| Fotos de la landing (hero, galería, secciones) | `content/media.ts` + archivos en `public/` |
+| Fotos de la landing (hero, galería, secciones) | `content/media.ts` + archivos en `public/landing/` |
 | Logo | `components/brand/logo.tsx` y `app/icon.svg` |
 | Colores y tipografías | `app/globals.css` (tokens) y `app/layout.tsx` (fuentes) |
 
-**Reemplazar las fotos de muestra:** poné tus fotos en `public/fotos/` (idealmente WebP, 1600–1920 px de ancho), y en `content/media.ts` cambiá `src`, `width`, `height` y `alt` de cada una. Podés borrar el campo `credit` y los archivos de `public/placeholder/`. Las fotos de muestra son de Wikimedia Commons (licencias CC, ver `/creditos`). Cuando no quede ninguna, podés sacar la página `app/(public)/creditos` y su link en el footer.
+### Imágenes de la landing
+
+Las imágenes de la landing son parte del sitio (código), no de la base: viven en `public/landing/` y se declaran en un único índice, `content/media.ts`. La base y Storage guardan solo lo que carga el admin (avatares de equipos, portadas y fotos de torneos, que se ven en la pestaña **Fotos** de cada torneo).
+
+| Imagen (`content/media.ts`) | Dónde se ve | Archivo |
+| --- | --- | --- |
+| `hero` | Portada (desktop) | `public/landing/hero.webp` |
+| `heroMobile` | Portada (celular) | `public/landing/hero-mobile.webp` |
+| `teeShot` | Sección "Qué es" (`#que-es`) | `public/landing/tee-shot.webp` |
+| `greenGolden` | "El club" (`#club`, foto grande) y galería | `public/landing/green-golden.webp` |
+| `teamGroup` | "El club" (`#club`, foto chica) y galería | `public/landing/team-group.webp` |
+| `flag9` | "La cancha" (`#cancha`, fondo) y galería | `public/landing/flag-9.webp` |
+| `flagHill` | Galería | `public/landing/flag-hill.webp` |
+| `course` | Galería | `public/landing/course.webp` |
+| `teamFlag` | Galería | `public/landing/team-flag.webp` |
+| `playersMountains` | Galería | `public/landing/players-mountains.webp` |
+
+**Cómo reemplazar una imagen:**
+
+- **Mismo nombre:** reemplazá el archivo en `public/landing/` por tu foto (idealmente WebP, 1600–1920 px de ancho). Si cambia la proporción, actualizá `width` y `height` en `content/media.ts`.
+- **Otro archivo:** copialo a `public/landing/` y en `content/media.ts` cambiá el nombre, `width`, `height` y `alt`.
+- Si la foto es del club, borrá su `credit`: `/creditos` lista solo las imágenes que lo tienen. Las fotos de muestra actuales son de Wikimedia Commons (licencias CC). Cuando no quede ninguna con crédito, podés sacar la página `app/(public)/creditos` y su link en el footer.
+- El orden de la galería se define en `landingGallery` (mismo archivo).
 
 > ⚠️ Los textos del club y de la cancha en `content/landing.ts` son **provisorios**: revisalos con Los Cedros.
 

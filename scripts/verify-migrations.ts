@@ -74,13 +74,14 @@ async function main() {
     }
   }
 
-  async function expectError(label: string, sql: string, role?: "anon" | "admin" | "intruso") {
+  async function expectError(label: string, sql: string, role?: "anon" | "admin" | "intruso", message?: string) {
     try {
       if (role) await as(role, () => db.exec(sql));
       else await db.exec(sql);
       fail(`${label} (no falló)`);
-    } catch {
-      ok(label);
+    } catch (e) {
+      if (message && !(e as Error).message.includes(message)) fail(`${label} (mensaje inesperado)`, e);
+      else ok(label);
     }
   }
 
@@ -180,8 +181,29 @@ async function main() {
   );
   await expectError(
     "campeón no inscripto",
-    `update public.tournaments set status = 'finalizado', champion_team_id = ${team(9)} where id = '${T2}'`,
+    `update public.tournaments set champion_team_id = ${team(6)} where id = '00000000-0000-4000-8000-b00000000001'`,
   );
+
+  console.log("\nEstados del torneo");
+  const T3 = "00000000-0000-4000-8000-b00000000003"; // Copa Primavera (próximo, sin cruces)
+  const T3R1 = "(select id from public.rounds where tournament_id = '" + T3 + "' and number = 1)";
+  await expectError("arrancar sin cruces en la Fecha 1", `update public.tournaments set status = 'en_curso' where id = '${T3}'`, undefined, "Armá los cruces de la Fecha 1 para arrancar");
+  await expectError("crear un torneo directamente en juego", "insert into public.tournaments (name, slug, status) values ('Nuevo', 'nuevo', 'en_curso')");
+  await expectOk("cruce en la Fecha 1", `insert into public.matches (round_id, team_a_id, team_b_id) values (${T3R1}, ${team(1)}, ${team(2)})`);
+  await expectOk("arrancar con la Fecha 1 armada (Fecha 2 vacía)", `update public.tournaments set status = 'en_curso' where id = '${T3}'`);
+  await expectOk("editar el torneo en juego sin cambiar estado", `update public.tournaments set description = 'x' where id = '${T3}'`);
+  await expectError("finalizar con resultados pendientes en la Fecha 1", `update public.tournaments set status = 'finalizado' where id = '${T3}'`, undefined, "Faltan resultados en la Fecha 1 (1 cruce)");
+  await expectOk(
+    "cargar los 3 resultados de la Fecha 1",
+    `insert into public.match_results (match_id, modality, winner_team_id)
+     select m.id, x.modality::public.modality_type, m.team_a_id
+     from public.matches m, (values ('individual'), ('four_ball'), ('foursome')) as x(modality)
+     where m.round_id = ${T3R1}`,
+  );
+  await expectError("finalizar con una fecha sin cruces", `update public.tournaments set status = 'finalizado' where id = '${T3}'`, undefined, "La Fecha 2 no tiene cruces");
+  await expectError("finalizar con resultados incompletos", `update public.tournaments set status = 'finalizado' where id = '${T2}'`, undefined, "Faltan resultados en la Fecha 2 (1 cruce)");
+  await expectOk("volver a próximo", `update public.tournaments set status = 'proximo' where id = '${T3}'`);
+  await expectOk("borrar el cruce estando en próximo", `delete from public.matches where round_id = ${T3R1}`);
   await expectOk(
     "reabrir torneo limpia el campeón",
     `update public.tournaments set status = 'en_curso' where id = '00000000-0000-4000-8000-b00000000001'`,

@@ -165,7 +165,3 @@ export function getTeamView(snap: Snapshot, slug: string) {
 
   return { team, historical, tournaments, recentMatches, teamById: teamMap(snap) };
 }
-
-export function getRecentPhotos(snap: Snapshot, limit = 8) {
-  return [...snap.photos].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, limit);
-}

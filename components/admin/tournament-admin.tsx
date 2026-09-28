@@ -19,15 +19,17 @@ import {
 } from "@/app/vestuario/(panel)/torneos/actions";
 import { TeamAvatar } from "@/components/team-avatar";
 import { StatusBadge } from "@/components/tournament/status-badge";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ACCEPTED_IMAGES, compressPhoto, uploadImage } from "@/lib/admin/image";
 import { ADMIN_BASE_PATH } from "@/lib/admin-path";
 import { formatLong } from "@/lib/dates";
+import type { ReadinessIssue } from "@/lib/domain/readiness";
 import type { Team, TournamentStatus } from "@/lib/domain/types";
 import { mediaUrl } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "./confirm-dialog";
 import { TeamMultiSelect } from "./team-multi-select";
+import { useAdminAction } from "./use-admin-action";
 import { Card, Field, btn, inputClass, textareaClass } from "./ui";
 
 export interface AdminTournamentData {
@@ -38,37 +40,14 @@ export interface AdminTournamentData {
   coverPath: string | null;
   status: TournamentStatus;
   championName: string | null;
-  pendingMatches: number;
+  /** Motivo por el que no se puede arrancar (null = se puede). */
+  startIssue: ReadinessIssue | null;
+  /** Motivo por el que no se puede finalizar (null = se puede). */
+  finishIssue: ReadinessIssue | null;
   totalMatches: number;
   teams: (Pick<Team, "id" | "name" | "avatarPath"> & { matches: number })[];
   availableTeams: Pick<Team, "id" | "name" | "avatarPath">[];
   rounds: { id: string; number: number; playDate: string; matches: number; pending: number }[];
-}
-
-type Run = <T>(fn: () => Promise<{ ok: true; data: T } | { ok: false; error: string }>, success?: string) => Promise<T | undefined>;
-
-function useRun(): [Run, boolean] {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const run: Run = async (fn, success) => {
-    setPending(true);
-    try {
-      const res = await fn();
-      if (!res.ok) {
-        toast.error(res.error);
-        return undefined;
-      }
-      if (success) toast.success(success);
-      router.refresh();
-      return res.data;
-    } catch (e) {
-      toast.error((e as Error).message || "Algo salió mal");
-      return undefined;
-    } finally {
-      setPending(false);
-    }
-  };
-  return [run, pending];
 }
 
 export function TournamentAdmin({ t }: { t: AdminTournamentData }) {
@@ -109,8 +88,13 @@ const HINTS: Record<TournamentStatus, string> = {
 };
 
 function StatusCard({ t }: { t: AdminTournamentData }) {
-  const [run, pending] = useRun();
+  const [run, pending] = useAdminAction();
   const [confirm, setConfirm] = useState<TournamentStatus | null>(null);
+
+  /** Motivo por el que la transición no está permitida (mismas reglas que el servidor y la base). */
+  const blockedBy = (to: TournamentStatus): ReadinessIssue | null =>
+    to === "finalizado" ? t.finishIssue : to === "en_curso" && (t.status === "borrador" || t.status === "proximo") ? t.startIssue : null;
+  const issues = [...new Set(TRANSITIONS[t.status].map((tr) => blockedBy(tr.to)).filter((i) => i !== null))];
 
   async function apply(to: TournamentStatus) {
     const data = await run(() => changeTournamentStatus(t.id, to));
@@ -139,7 +123,7 @@ function StatusCard({ t }: { t: AdminTournamentData }) {
               key={tr.to}
               type="button"
               className={tr.primary ? btn.primary : btn.secondary}
-              disabled={pending}
+              disabled={pending || !!blockedBy(tr.to)}
               onClick={() => (tr.to === "finalizado" || t.status === "finalizado" ? setConfirm(tr.to) : apply(tr.to))}
             >
               {pending && <Loader2 className="size-4 animate-spin" />}
@@ -147,24 +131,25 @@ function StatusCard({ t }: { t: AdminTournamentData }) {
             </button>
           ))}
         </div>
+        {issues.map((issue) => (
+          <p key={issue.reason} className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-cedar/40 bg-cedar/10 px-3 py-2 text-sm text-chalk">
+            <span>{issue.reason}</span>
+            {issue.round !== null && (
+              <Link href={`${ADMIN_BASE_PATH}/torneos/${t.id}/fechas/${issue.round}`} className="inline-flex items-center gap-0.5 font-semibold text-grass">
+                Ir a la Fecha {issue.round} <ChevronRight className="size-4" />
+              </Link>
+            )}
+          </p>
+        ))}
       </div>
       <ConfirmDialog
         open={confirm !== null}
         onOpenChange={(o) => !o && setConfirm(null)}
         title={confirm === "finalizado" ? "¿Finalizar el torneo?" : "¿Reabrir el torneo?"}
         description={
-          confirm === "finalizado" ? (
-            <>
-              {t.pendingMatches > 0 && (
-                <span className="mb-2 block font-semibold text-cedar-soft">
-                  ⚠️ Hay {t.pendingMatches} {t.pendingMatches === 1 ? "cruce" : "cruces"} sin los 3 resultados cargados.
-                </span>
-              )}
-              Se va a guardar como campeón al primero de la tabla y sumará un título en el ranking histórico.
-            </>
-          ) : (
-            "El torneo vuelve a estar en juego y se borra el campeón guardado (se recalcula al finalizar de nuevo)."
-          )
+          confirm === "finalizado"
+            ? "Se va a guardar como campeón al primero de la tabla y sumará un título en el ranking histórico."
+            : "El torneo vuelve a estar en juego y se borra el campeón guardado (se recalcula al finalizar de nuevo)."
         }
         confirmLabel={confirm === "finalizado" ? "Finalizar" : "Reabrir"}
         onConfirm={() => apply(confirm!)}
@@ -176,7 +161,7 @@ function StatusCard({ t }: { t: AdminTournamentData }) {
 /* ───────────── Fechas ───────────── */
 
 function RoundsCard({ t }: { t: AdminTournamentData }) {
-  const [run, pending] = useRun();
+  const [run, pending] = useAdminAction();
   const [dates, setDates] = useState(() => Object.fromEntries(t.rounds.map((r) => [r.id, r.playDate])));
   const [newDate, setNewDate] = useState("");
   const [confirmRemove, setConfirmRemove] = useState(false);
@@ -221,7 +206,7 @@ function RoundsCard({ t }: { t: AdminTournamentData }) {
           disabled={pending}
           onClick={() => run(() => saveRoundDates(t.id, t.rounds.map((r) => ({ id: r.id, number: r.number, playDate: dates[r.id] ?? r.playDate }))), "Fechas guardadas")}
         >
-          <Save className="size-4" /> Guardar días
+          {pending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Guardar días
         </button>
       )}
 
@@ -238,7 +223,7 @@ function RoundsCard({ t }: { t: AdminTournamentData }) {
               setNewDate("");
             }}
           >
-            <CalendarPlus className="size-4" /> Agregar
+            {pending ? <Loader2 className="size-4 animate-spin" /> : <CalendarPlus className="size-4" />} Agregar
           </button>
         </div>
         {last && t.rounds.length > 1 && last.matches === 0 && (
@@ -266,7 +251,7 @@ function RoundsCard({ t }: { t: AdminTournamentData }) {
 /* ───────────── Equipos ───────────── */
 
 function TeamsCard({ t }: { t: AdminTournamentData }) {
-  const [run, pending] = useRun();
+  const [run, pending] = useAdminAction();
   const [adding, setAdding] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [removing, setRemoving] = useState<AdminTournamentData["teams"][number] | null>(null);
@@ -301,12 +286,12 @@ function TeamsCard({ t }: { t: AdminTournamentData }) {
       </ul>
       {locked && <p className="mt-2 text-xs text-mist">Torneo finalizado: reabrilo para modificar los equipos.</p>}
 
-      <Sheet open={adding} onOpenChange={(o) => { setAdding(o); if (!o) setSelected([]); }}>
-        <SheetContent side="bottom" className="max-h-[90dvh] overflow-y-auto rounded-t-3xl border-white/10 bg-night sm:mx-auto sm:max-w-lg">
-          <SheetHeader>
-            <SheetTitle className="font-display text-3xl text-chalk">Agregar equipos</SheetTitle>
-          </SheetHeader>
-          <div className="flex flex-col gap-4 px-4 pb-[calc(1.5rem+var(--safe-bottom))]">
+      <Dialog open={adding} onOpenChange={(o) => { if (pending) return; setAdding(o); if (!o) setSelected([]); }}>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto rounded-3xl border border-white/10 bg-night p-5 sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display text-3xl text-chalk">Agregar equipos</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
             <TeamMultiSelect teams={t.availableTeams} selected={selected} onChange={setSelected} />
             <button
               type="button"
@@ -321,8 +306,8 @@ function TeamsCard({ t }: { t: AdminTournamentData }) {
               {pending && <Loader2 className="size-4 animate-spin" />} Agregar {selected.length || ""}
             </button>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
       <ConfirmDialog
         open={!!removing}
         onOpenChange={(o) => !o && setRemoving(null)}
@@ -342,7 +327,7 @@ function TeamsCard({ t }: { t: AdminTournamentData }) {
 /* ───────────── Datos y portada ───────────── */
 
 function InfoCard({ t }: { t: AdminTournamentData }) {
-  const [run, pending] = useRun();
+  const [run, pending] = useAdminAction();
   const [name, setName] = useState(t.name);
   const [description, setDescription] = useState(t.description ?? "");
   const [uploading, setUploading] = useState(false);
@@ -380,12 +365,12 @@ function InfoCard({ t }: { t: AdminTournamentData }) {
           )}
         </div>
         <div className="flex gap-2">
-          <button type="button" className={cn(btn.secondary, "flex-1")} onClick={() => fileRef.current?.click()} disabled={uploading}>
+          <button type="button" className={cn(btn.secondary, "flex-1")} onClick={() => fileRef.current?.click()} disabled={uploading || pending}>
             <ImagePlus className="size-4" /> {cover ? "Cambiar portada" : "Subir portada"}
           </button>
           {cover && (
-            <button type="button" className={btn.icon} onClick={() => run(() => setTournamentCover(t.id, null), "Portada quitada")} aria-label="Quitar portada">
-              <X className="size-5" />
+            <button type="button" className={btn.icon} onClick={() => run(() => setTournamentCover(t.id, null), "Portada quitada")} disabled={pending || uploading} aria-label="Quitar portada">
+              {pending ? <Loader2 className="size-5 animate-spin" /> : <X className="size-5" />}
             </button>
           )}
           <input

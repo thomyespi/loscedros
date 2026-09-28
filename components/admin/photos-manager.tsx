@@ -3,7 +3,7 @@
 import { ArrowDown, ArrowUp, ImagePlus, Loader2, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { addPhotos, deletePhoto, movePhoto, setPhotoAsCover, updatePhoto } from "@/app/vestuario/(panel)/torneos/[id]/fotos/actions";
 import { ACCEPTED_IMAGES, compressPhoto, uploadImage } from "@/lib/admin/image";
@@ -11,6 +11,7 @@ import { mediaUrl } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "./confirm-dialog";
 import { Card, EmptyState, btn, inputClass } from "./ui";
+import { useAdminAction } from "./use-admin-action";
 
 export interface AdminPhoto {
   id: string;
@@ -34,6 +35,8 @@ export function PhotosManager({
   const fileRef = useRef<HTMLInputElement>(null);
   const [roundId, setRoundId] = useState<string>("");
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [refreshing, startTransition] = useTransition();
+  const busy = !!progress || refreshing;
 
   async function onFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -58,8 +61,11 @@ export function PhotosManager({
       else toast.success(`${uploaded.length} ${uploaded.length === 1 ? "foto subida" : "fotos subidas"}`);
     }
     if (failed) toast.error(`${failed} ${failed === 1 ? "foto no se pudo subir" : "fotos no se pudieron subir"}`);
-    setProgress(null);
-    router.refresh();
+    // El botón sigue ocupado hasta que las fotos nuevas ya se ven en la lista.
+    startTransition(() => {
+      setProgress(null);
+      router.refresh();
+    });
   }
 
   return (
@@ -77,9 +83,9 @@ export function PhotosManager({
               ))}
             </select>
           </label>
-          <button type="button" className={btn.primary} onClick={() => fileRef.current?.click()} disabled={!!progress}>
-            {progress ? <Loader2 className="size-5 animate-spin" /> : <ImagePlus className="size-5" />}
-            {progress ? `Subiendo ${progress.done}/${progress.total}…` : "Elegir fotos"}
+          <button type="button" className={btn.primary} onClick={() => fileRef.current?.click()} disabled={busy}>
+            {busy ? <Loader2 className="size-5 animate-spin" /> : <ImagePlus className="size-5" />}
+            {progress ? `Subiendo ${progress.done}/${progress.total}…` : refreshing ? "Actualizando…" : "Elegir fotos"}
           </button>
           {progress && (
             <div className="h-2 overflow-hidden rounded-full bg-white/10" role="progressbar" aria-valuenow={progress.done} aria-valuemax={progress.total}>
@@ -139,19 +145,9 @@ function PhotoRow({
   first: boolean;
   last: boolean;
 }) {
-  const router = useRouter();
   const [caption, setCaption] = useState(photo.caption ?? "");
-  const [busy, setBusy] = useState(false);
+  const [run, busy] = useAdminAction();
   const [confirm, setConfirm] = useState(false);
-
-  async function run(fn: () => Promise<{ ok: boolean; error?: string }>, success?: string) {
-    setBusy(true);
-    const res = await fn();
-    setBusy(false);
-    if (!res.ok) return toast.error(res.error ?? "Algo salió mal");
-    if (success) toast.success(success, { duration: 1200 });
-    router.refresh();
-  }
 
   return (
     <li className="flex gap-3 rounded-2xl border border-white/10 bg-pitch p-3">

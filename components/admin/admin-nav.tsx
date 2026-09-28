@@ -4,6 +4,7 @@ import { House, Settings, Shield, Trophy } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ADMIN_BASE_PATH } from "@/lib/admin-path";
+import { LinkPendingBar, LinkPendingSpinner } from "@/components/layout/link-pending";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
@@ -31,10 +32,11 @@ export function AdminBottomNav() {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={cn("flex h-full flex-col items-center justify-center gap-1 text-[0.7rem] font-medium", active ? "text-grass" : "text-mist")}
+                className={cn("relative flex h-full flex-col items-center justify-center gap-1 text-[0.7rem] font-medium", active ? "text-grass" : "text-mist")}
               >
                 <Icon className="size-[22px]" strokeWidth={active ? 2.4 : 1.8} />
                 {label}
+                <LinkPendingBar className="top-0" />
               </Link>
             </li>
           );
@@ -57,12 +59,13 @@ export function AdminSideNav() {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition",
+              "relative flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition",
               active ? "bg-grass/10 text-grass" : "text-mist hover:bg-white/5 hover:text-chalk",
             )}
           >
             <Icon className="size-5" />
             {label}
+            <LinkPendingSpinner className="ml-auto" />
           </Link>
         );
       })}

@@ -24,7 +24,8 @@ export function buildSeedSql() {
     "insert into public.teams (id, name, slug, avatar_path, archived_at, created_at) values",
     rows(teams.map((t) => [t.id, t.name, t.slug, t.avatarPath, null, t.createdAt])) + ";",
     "",
-    "-- Los torneos finalizados se insertan en curso y se cierran al final (el campeón debe estar inscripto).",
+    "-- Los torneos en juego y finalizados se insertan como próximos y cambian de estado al final:",
+    "-- para arrancar hacen falta cruces en la Fecha 1, y para finalizar todos los resultados.",
     "insert into public.tournaments (id, name, slug, description, status, created_at) values",
     rows(
       tournaments.map((t) => [
@@ -32,7 +33,7 @@ export function buildSeedSql() {
         t.name,
         t.slug,
         t.description,
-        t.status === "finalizado" ? "en_curso" : t.status,
+        t.status === "borrador" ? "borrador" : "proximo",
         t.createdAt,
       ]),
     ) + ";",
@@ -51,6 +52,9 @@ export function buildSeedSql() {
     "",
   ];
 
+  for (const t of tournaments.filter((t) => t.status === "en_curso")) {
+    out.push(`update public.tournaments set status = 'en_curso' where id = ${q(t.id)};`);
+  }
   for (const t of tournaments.filter((t) => t.status === "finalizado")) {
     out.push(
       `update public.tournaments set status = 'finalizado', champion_team_id = ${q(t.championTeamId)}, finished_at = ${q(t.finishedAt)} where id = ${q(t.id)};`,

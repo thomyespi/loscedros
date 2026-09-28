@@ -30,9 +30,11 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() refresca la sesión si hace falta y verifica el JWT localmente cuando el
+  // proyecto usa claves asimétricas (sin ida y vuelta a Auth en cada navegación).
+  // Solo decide la redirección: la barrera real es requireAdmin (getUser + is_admin) y RLS.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims.sub ? data.claims : null;
 
   if (!user && !isPublicAdminPath) {
     const url = new URL(LOGIN_PATH, request.url);

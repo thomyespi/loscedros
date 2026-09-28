@@ -6,6 +6,9 @@ const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
 const buckets = Object.values(STORAGE_BUCKETS).join("|");
 
 const nextConfig: NextConfig = {
+  // Solo en `next dev`: permite abrir el sitio desde el celular por la IP de la red local
+  // (p. ej. http://192.168.0.126:3000). Sin esto Next bloquea sus scripts y la página no hidrata.
+  allowedDevOrigins: ["192.168.*.*"],
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [60, 75, 90],

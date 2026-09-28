@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Medal } from "lucide-react";
 import { TrophyIcon } from "@/components/brand/icons";
 import { Reveal } from "@/components/motion/reveal";
+import { CompetitionTabs } from "@/components/layout/competition-tabs";
 import { PageHeader } from "@/components/page-header";
 import { TeamAvatar } from "@/components/team-avatar";
 import { podium } from "@/components/tournament/podium-colors";
@@ -27,6 +28,7 @@ export default async function RankingPage() {
   return (
     <>
       <PageHeader
+        top={<CompetitionTabs />}
         eyebrow="Desde el primer torneo"
         title="Ranking histórico"
         description="Todos los equipos, todos los torneos. Cada modalidad ganada suma 3 puntos para siempre."

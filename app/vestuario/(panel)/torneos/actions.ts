@@ -6,6 +6,7 @@ import { loadSnapshot } from "@/lib/data/snapshot";
 import { refreshPublicData } from "@/lib/admin/revalidate";
 import { dbMessage, fail, ok, type ActionResult } from "@/lib/admin/result";
 import { removeFiles } from "@/lib/admin/storage";
+import { tournamentReadiness } from "@/lib/domain/readiness";
 import type { TournamentStatus } from "@/lib/domain/types";
 import { computeStandings } from "@/lib/standings/compute";
 import { uniqueSlug } from "@/lib/slug";
@@ -144,21 +145,28 @@ export async function changeTournamentStatus(id: string, status: TournamentStatu
   const { supabase } = await requireAdmin();
   if (!["borrador", "proximo", "en_curso", "finalizado"].includes(status)) return fail("Estado inválido");
 
+  const snap = await loadSnapshot(supabase);
+  const t = snap.tournaments.find((x) => x.id === id);
+  if (!t) return fail("Torneo no encontrado");
+  const rounds = snap.rounds.filter((r) => r.tournamentId === id);
+  const roundIds = new Set(rounds.map((r) => r.id));
+  const matches = snap.matches.filter((m) => roundIds.has(m.roundId));
+  const matchIds = new Set(matches.map((m) => m.id));
+  const results = snap.results.filter((r) => matchIds.has(r.matchId));
+  const readiness = tournamentReadiness({ rounds, matches, results });
+
+  // Mismas reglas que el trigger check_tournament(): arrancar exige cruces en la
+  // Fecha 1 (reabrir un finalizado no se valida) y finalizar exige todo cargado.
+  if (status === "en_curso" && (t.status === "borrador" || t.status === "proximo") && readiness.startIssue)
+    return fail(readiness.startIssue.reason);
+  if (status === "finalizado" && t.status !== "finalizado" && readiness.finishIssue) return fail(readiness.finishIssue.reason);
+
   if (status !== "finalizado") {
     const { error } = await supabase.from("tournaments").update({ status }).eq("id", id);
     if (error) return fail(dbMessage(error));
     refreshPublicData();
     return ok({});
   }
-
-  const snap = await loadSnapshot(supabase);
-  const t = snap.tournaments.find((x) => x.id === id);
-  if (!t) return fail("Torneo no encontrado");
-  const roundIds = new Set(snap.rounds.filter((r) => r.tournamentId === id).map((r) => r.id));
-  const matches = snap.matches.filter((m) => roundIds.has(m.roundId));
-  const matchIds = new Set(matches.map((m) => m.id));
-  const results = snap.results.filter((r) => matchIds.has(r.matchId));
-  if (results.length === 0) return fail("No hay resultados cargados: no se puede definir un campeón");
 
   const table = computeStandings({ teams: snap.teams.filter((x) => t.teamIds.includes(x.id)), matches, results });
   const champion = table[0].teamId;

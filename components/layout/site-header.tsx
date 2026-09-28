@@ -9,6 +9,7 @@ import { instagramUrl } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 import { whatsappUrl } from "@/lib/whatsapp";
 import { CompetitionMenu } from "./competition-menu";
+import { LinkPendingBar } from "./link-pending";
 import { COMPETITION_SECTION, NAV_LINKS, isCompetitionPath } from "./nav-links";
 import { useActiveSection } from "./use-active-section";
 
@@ -55,13 +56,14 @@ export function SiteHeader({ whatsapp, instagram }: { whatsapp: string; instagra
                 href={link.href}
                 aria-current={active ? "location" : undefined}
                 className={cn(
-                  "rounded-full px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
+                  "relative rounded-full px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                   // En lg no entra todo: el logo ya lleva al inicio.
                   link.section === null && "hidden xl:block",
                   active ? "bg-white/10 text-chalk" : "text-mist hover:text-chalk",
                 )}
               >
                 {link.label}
+                <LinkPendingBar className="bottom-0.5 left-1/2 w-6 -translate-x-1/2" />
               </Link>
             );
           })}
