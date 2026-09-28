@@ -32,4 +32,4 @@
 - [x] 5.1 Actualizar el README (tabla de qué se edita desde el panel: "Horarios" ahora son días y horas)
 - [x] 5.2 Correr `npm run lint`, `npx tsc --noEmit`, `npm test` y `npm run build`
 - [x] 5.3 Aplicar en Supabase `20260929000001_structured_hours.sql` (solo agrega columnas; el sitio publicado sigue andando). El mapper usa el horario por defecto si recibe una fila cacheada sin las columnas nuevas
-- [ ] 5.4 Después del deploy, aplicar `20260929000002_drop_opening_hours.sql` (borra `opening_hours`)
+- [x] 5.4 Después del deploy, aplicar `20260929000002_drop_opening_hours.sql` (borra `opening_hours`)

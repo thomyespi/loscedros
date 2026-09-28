@@ -56,11 +56,15 @@ Todos los CTAs de contacto SHALL abrir WhatsApp (`https://wa.me/<número>`) con 
 - **THEN** se abre WhatsApp con un mensaje que menciona "Apertura 2026"
 
 ### Requirement: Ubicación y horarios
-La sección "Cómo llegar" SHALL mostrar la dirección (César Bacle 1500, B1614 Malvinas Argentinas, Buenos Aires), un mapa embebido con carga diferida y un botón "Cómo llegar" que abra Google Maps con la ruta. Los horarios SHALL leerse de la configuración del sitio.
+La sección "Cómo llegar" SHALL mostrar la dirección (César Bacle 1500, B1614 Malvinas Argentinas, Buenos Aires), un mapa embebido con carga diferida y un botón "Cómo llegar" que abra Google Maps con la ruta. Los horarios SHALL leerse de la configuración del sitio y mostrarse con el texto completo del formateador (por ejemplo "Miércoles a domingo, de 10 a 16:30 h").
 
 #### Scenario: Abrir la ruta
 - **WHEN** un visitante toca "Cómo llegar" desde el celular
 - **THEN** se abre Google Maps con el destino cargado
+
+#### Scenario: Horario en Cómo llegar
+- **WHEN** el horario configurado es miércoles a domingo, de 10:00 a 16:30
+- **THEN** "Cómo llegar" muestra "Miércoles a domingo, de 10 a 16:30 h"
 
 ### Requirement: Animaciones y performance
 La landing SHALL usar animaciones de entrada al hacer scroll, contadores animados y micro-interacciones, y MUST respetar `prefers-reduced-motion`. La página MUST alcanzar un Lighthouse mobile ≥ 90 en Performance y ≥ 95 en Accesibilidad, con imágenes optimizadas y carga diferida debajo del primer pantallazo.
@@ -144,11 +148,15 @@ En desktop (≥ 1024px), el texto del hero (título, subtítulo, CTAs y datos) M
 - **THEN** lee "Malvinas Argentinas" completo
 
 ### Requirement: Estadísticas del club
-Los datos destacados de la sección "El club" MUST NOT incluir la cantidad de equipos en el ranking.
+Los datos destacados de la sección "El club" MUST NOT incluir la cantidad de equipos en el ranking. El dato sobre apertura SHALL mostrar la cantidad de días abiertos por semana según la configuración, y MUST NOT tener un número de horas o días escrito a mano.
 
 #### Scenario: Ranking con equipos
 - **WHEN** el ranking histórico tiene 12 equipos
 - **THEN** la sección "El club" no muestra ningún dato "equipos en el ranking"
+
+#### Scenario: Días abiertos
+- **WHEN** el horario configurado es miércoles a domingo
+- **THEN** "El club" muestra "5 días abiertos por semana"
 
 ### Requirement: Mapa de la cancha en la landing
 Cuando hay un mapa del momento cargado, la sección "La cancha" SHALL mostrarlo en un bloque con ancla `#mapa`, con carga diferida, sus dimensiones reales (sin salto de layout) y la opción de verlo en grande a pantalla completa. El hero SHALL mostrar un atajo "Ver mapa de la cancha" que lleve a `#mapa`. Si no hay mapa cargado, MUST NOT mostrarse ni el bloque ni el atajo.
@@ -171,4 +179,19 @@ El footer de todas las páginas públicas SHALL incluir un agradecimiento discre
 #### Scenario: Link al desarrollador
 - **WHEN** un visitante toca "Gen12 Software" en el footer
 - **THEN** se abre https://gen12software.com/ en una pestaña nueva
+
+### Requirement: Horario derivado en toda la landing
+Todos los lugares de la landing que muestran días u horas de apertura SHALL derivarlos del horario configurado: el dato "Horario" del hero (texto corto, por ejemplo "10–16:30 h"), la tarjeta de apertura de "La cancha" (título "Abierto todos los días" o "Abierto de <día> a <día>"), el texto de horarios de "La cancha", "Cómo llegar" y el footer. La home SHALL incluir el horario en sus datos estructurados (`openingHoursSpecification` de schema.org) con los días y horas configurados.
+
+#### Scenario: Hero con horario con minutos
+- **WHEN** el horario configurado es de 10:00 a 16:30
+- **THEN** el dato "Horario" del hero muestra "10–16:30 h"
+
+#### Scenario: Tarjeta de apertura
+- **WHEN** el horario configurado es miércoles a domingo
+- **THEN** la tarjeta de "La cancha" dice "Abierto de miércoles a domingo" y no "Abierto todos los días"
+
+#### Scenario: Datos estructurados
+- **WHEN** un buscador lee la home con horario miércoles a domingo de 10:00 a 16:30
+- **THEN** el JSON-LD incluye `openingHoursSpecification` con `dayOfWeek` de miércoles a domingo, `opens` "10:00" y `closes` "16:30"
 
