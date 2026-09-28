@@ -8,10 +8,11 @@ import { media } from "@/content/media";
 export function WhatIs() {
   return (
     <section id="que-es" className="container-page scroll-mt-24 py-20 sm:py-28">
-      <div className="grid items-center gap-12 lg:grid-cols-2">
-        <div className="flex flex-col gap-8">
+      {/* grid-cols-1 + min-w-0: sin esto, la fila del carrusel ensancha la columna más que la pantalla y todo se recorta. */}
+      <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+        <div className="flex min-w-0 flex-col gap-8">
           <SectionHeading eyebrow={whatIs.eyebrow} title={whatIs.title} description={whatIs.description} />
-          <ol className="fade-x no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 [mask-image:none] sm:[mask-image:none]">
+          <ol className="fade-x no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:scroll-px-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 [mask-image:none] sm:[mask-image:none]">
             {whatIs.steps.map((step, i) => (
               <Reveal
                 as="li"
@@ -27,7 +28,7 @@ export function WhatIs() {
           </ol>
         </div>
 
-        <Reveal className="relative" y={40}>
+        <Reveal className="relative min-w-0" y={40}>
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl sm:aspect-[4/3] lg:aspect-[4/5]">
             <Image
               src={media.teeShot.src}
