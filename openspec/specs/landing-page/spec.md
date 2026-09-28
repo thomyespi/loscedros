@@ -4,7 +4,7 @@
 TBD - created by archiving change add-los-cedros-site. Update Purpose after archive.
 ## Requirements
 ### Requirement: Diseño mobile-first
-Todas las páginas públicas SHALL diseñarse primero para pantallas de 360–430px de ancho y adaptarse luego a tablet y desktop. Ningún contenido MUST generar scroll horizontal de página, los elementos interactivos MUST tener un área táctil mínima de 44×44px y el texto base MUST ser de al menos 16px.
+Todas las páginas públicas SHALL diseñarse primero para pantallas de 360–430px de ancho y adaptarse luego a tablet y desktop. Ningún contenido MUST generar scroll horizontal de página ni quedar recortado por los bordes de la pantalla, los elementos interactivos MUST tener un área táctil mínima de 44×44px y el texto base MUST ser de al menos 16px. Los carruseles horizontales MUST hacer scroll dentro del ancho de la página sin ensanchar la sección que los contiene.
 
 #### Scenario: Visualización en celular
 - **WHEN** un visitante abre cualquier página pública en un viewport de 375px
@@ -13,6 +13,10 @@ Todas las páginas públicas SHALL diseñarse primero para pantallas de 360–43
 #### Scenario: Visualización en desktop
 - **WHEN** un visitante abre la landing en un viewport de 1440px
 - **THEN** el layout aprovecha el ancho con grillas de varias columnas sin estirar textos más allá de un ancho legible
+
+#### Scenario: "¿Qué es el footgolf?" en celular
+- **WHEN** un visitante ve la sección "¿Qué es el footgolf?" en un viewport de 360px
+- **THEN** el título, la descripción, la foto y los carteles "N° 5 pelota de fútbol" y "53 cm" se ven completos dentro de la pantalla, y al deslizar el carrusel de pasos hasta el final la tarjeta 4 se ve entera
 
 ### Requirement: Navegación pública
 El sitio SHALL tener, en mobile, una barra de navegación inferior fija con los accesos Inicio, Torneos, Ranking y un botón destacado de WhatsApp, y un header compacto con el logo. En desktop SHALL mostrar un header superior con dos grupos separados: (1) los links a secciones de la landing, en el mismo orden en que aparecen al hacer scroll (Inicio, El club, La cancha, Galería, Cómo llegar, Preguntas), y (2) un botón aparte "Competencias" que despliega los accesos a Torneos y Ranking histórico. En la home, el link de la sección visible SHALL resaltarse a medida que el visitante hace scroll (las secciones sin link propio mantienen resaltado el link de la sección anterior), y el botón "Competencias" SHALL resaltarse al llegar a la sección Competencia. Fuera de la home, "Competencias" SHALL resaltarse en las páginas de torneos, ranking y equipos. La navegación MUST NOT incluir ningún link al panel de administración.
