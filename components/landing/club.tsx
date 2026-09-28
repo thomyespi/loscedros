@@ -4,8 +4,14 @@ import { Reveal } from "@/components/motion/reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { club } from "@/content/landing";
 import { media } from "@/content/media";
+import type { OpeningHours } from "@/lib/hours";
 
-export function Club() {
+export function Club({ hours }: { hours: OpeningHours }) {
+  const open = hours.days.length;
+  const highlights = [
+    ...club.highlights,
+    { value: open, suffix: "", label: open === 1 ? "día abierto por semana" : "días abiertos por semana" },
+  ];
   return (
     <section id="club" className="relative scroll-mt-24 overflow-hidden bg-pitch py-20 sm:py-28">
       <div aria-hidden className="pointer-events-none absolute -top-40 -left-40 size-[28rem] rounded-full bg-cedar/10 blur-3xl" />
@@ -35,7 +41,7 @@ export function Club() {
             </Reveal>
           ))}
           <dl className="mt-2 grid grid-cols-3 gap-3">
-            {club.highlights.map((h, i) => (
+            {highlights.map((h, i) => (
               <Reveal key={h.label} delay={i * 0.08} className="rounded-2xl border border-white/10 bg-night/50 p-4">
                 <dd className="font-display tabular text-4xl text-chalk sm:text-5xl">
                   <CountUp to={h.value} />

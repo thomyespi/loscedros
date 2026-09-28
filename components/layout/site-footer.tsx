@@ -3,6 +3,7 @@ import Link from "next/link";
 import { InstagramIcon, WhatsAppIcon } from "@/components/brand/icons";
 import { Logo } from "@/components/brand/logo";
 import type { SiteSettings } from "@/lib/domain/types";
+import { formatHours } from "@/lib/hours";
 import { formatPhone, instagramUrl, mapsDirectionsUrl } from "@/lib/settings";
 import { whatsappUrl } from "@/lib/whatsapp";
 
@@ -57,7 +58,7 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
           </a>
           <p className="flex gap-2 text-mist">
             <Clock className="mt-0.5 size-4 shrink-0 text-cedar" />
-            {settings.openingHours}
+            {formatHours(settings.hours)}
           </p>
           <a
             href={whatsappUrl(settings.whatsapp, { kind: "consulta" })}

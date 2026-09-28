@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { MODALITIES } from "@/lib/domain/types";
+import { normalizeDays, type Weekday } from "@/lib/hours";
 
 const uuid = z.string().uuid({ message: "Identificador inválido" });
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Elegí un día válido" });
+const halfHour = z.string().regex(/^([01]\d|2[0-3]):(00|30)$/, { message: "Elegí una hora válida" });
 
 export const teamSchema = z.object({
   name: z
@@ -57,11 +59,17 @@ export const resultSchema = z.object({
 });
 
 export const settingsSchema = z.object({
-  openingHours: z
-    .string()
-    .trim()
-    .min(3, { message: "Indicá los horarios" })
-    .max(80, { message: "Hasta 80 caracteres" }),
+  hours: z
+    .object({
+      days: z
+        .array(z.number().int().min(1).max(7))
+        .transform(normalizeDays)
+        .pipe(z.array(z.custom<Weekday>()).min(1, { message: "Marcá al menos un día" })),
+      opens: halfHour,
+      closes: halfHour,
+    })
+    // "HH:MM" se compara bien como texto.
+    .refine((h) => h.closes > h.opens, { message: "La hora de cierre tiene que ser después de la apertura" }),
   whatsapp: z
     .string()
     .transform((v) => v.replace(/\D/g, ""))

@@ -6,6 +6,8 @@ import { initials, avatarGradient } from "@/lib/avatar";
 import { roundDatesSchema, settingsSchema, teamSchema } from "@/lib/validation";
 import { formatPhone } from "@/lib/settings";
 
+const hours = { days: [7, 3, 4, 5, 6, 3], opens: "10:00", closes: "16:30" };
+
 describe("slug", () => {
   it("normaliza acentos, ñ y símbolos", () => {
     expect(slugify("Los Pibes del Hoyo 9!")).toBe("los-pibes-del-hoyo-9");
@@ -63,13 +65,25 @@ describe("validación", () => {
   });
   it("settings normaliza whatsapp e instagram", () => {
     const r = settingsSchema.safeParse({
-      openingHours: "Todos los días de 9 a 19 h",
+      hours,
       whatsapp: "+54 9 11 3956-7637",
       instagram: "@los_cedros_footgolf",
       address: "César Bacle 1500",
     });
     expect(r.success && r.data.whatsapp).toBe("5491139567637");
     expect(r.success && r.data.instagram).toBe("los_cedros_footgolf");
-    expect(settingsSchema.safeParse({ openingHours: "x9", whatsapp: "11-abc", instagram: "x", address: "abcde" }).success).toBe(false);
+    expect(r.success && r.data.hours.days).toEqual([3, 4, 5, 6, 7]);
+    expect(settingsSchema.safeParse({ hours, whatsapp: "11-abc", instagram: "x", address: "abcde" }).success).toBe(false);
+  });
+  it("settings valida el horario", () => {
+    const base = { whatsapp: "5491139567637", instagram: "los_cedros_footgolf", address: "César Bacle 1500" };
+    const err = (h: object) => {
+      const r = settingsSchema.safeParse({ ...base, hours: h });
+      return r.success ? null : r.error.issues[0].message;
+    };
+    expect(err({ ...hours, days: [] })).toBe("Marcá al menos un día");
+    expect(err({ ...hours, opens: "16:00", closes: "10:00" })).toBe("La hora de cierre tiene que ser después de la apertura");
+    expect(err({ ...hours, opens: "10:07" })).toBe("Elegí una hora válida");
+    expect(err({ ...hours, days: [0, 3] })).not.toBeNull();
   });
 });

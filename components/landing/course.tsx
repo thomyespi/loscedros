@@ -5,13 +5,23 @@ import { SectionHeading } from "@/components/section-heading";
 import { course } from "@/content/landing";
 import { media } from "@/content/media";
 import type { CourseMap as CourseMapData } from "@/lib/domain/types";
+import { formatHours, formatTime, openDaysTitle, type OpeningHours } from "@/lib/hours";
 import { mediaUrl } from "@/lib/storage";
 import { CourseMap } from "./course-map";
 
 const ICONS = { flag: Flag, clock: Clock, users: Users, trophy: Trophy } as const;
 
-export function Course({ openingHours, courseMap }: { openingHours: string; courseMap: CourseMapData | null }) {
+export function Course({ hours, courseMap }: { hours: OpeningHours; courseMap: CourseMapData | null }) {
   const mapSrc = courseMap ? mediaUrl(courseMap.path) : null;
+  const features = course.features.map((f) =>
+    f.icon === "clock"
+      ? {
+          ...f,
+          title: openDaysTitle(hours),
+          text: `Vení cuando quieras entre las ${formatTime(hours.opens)} y las ${formatTime(hours.closes)}; solo avisanos.`,
+        }
+      : f,
+  );
   return (
     <section id="cancha" className="scroll-mt-24 py-20 sm:py-28">
       <div className="container-page">
@@ -33,14 +43,14 @@ export function Course({ openingHours, courseMap }: { openingHours: string; cour
               <Clock className="size-5 text-grass" />
               <div>
                 <p className="text-xs tracking-widest text-mist uppercase">Horarios</p>
-                <p className="font-semibold text-chalk">{openingHours}</p>
+                <p className="font-semibold text-chalk">{formatHours(hours)}</p>
               </div>
             </div>
           </div>
         </Reveal>
 
         <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {course.features.map((f, i) => {
+          {features.map((f, i) => {
             const Icon = ICONS[f.icon as keyof typeof ICONS];
             return (
               <Reveal as="li" key={f.title} delay={i * 0.06} className="flex gap-4 rounded-2xl border border-white/10 bg-pitch p-5">

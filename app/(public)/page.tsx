@@ -11,6 +11,7 @@ import { landingGallery } from "@/content/media";
 import { SITE_URL } from "@/lib/config";
 import { getHistorical, getSpotlight, teamMap } from "@/lib/data/selectors";
 import { getSnapshot } from "@/lib/data/snapshot";
+import { toOpeningHoursSpec } from "@/lib/hours";
 import { instagramUrl } from "@/lib/settings";
 
 export default async function HomePage() {
@@ -34,17 +35,18 @@ export default async function HomePage() {
       addressRegion: "Buenos Aires",
       addressCountry: "AR",
     },
+    openingHoursSpecification: toOpeningHoursSpec(settings.hours),
     sameAs: [instagramUrl(settings.instagram)],
     sport: "Footgolf",
   };
 
   return (
     <>
-      <Hero whatsapp={settings.whatsapp} openingHours={settings.openingHours} spotlight={spotlight} hasCourseMap={!!settings.courseMap} />
+      <Hero whatsapp={settings.whatsapp} hours={settings.hours} spotlight={spotlight} hasCourseMap={!!settings.courseMap} />
       <Marquee />
       <WhatIs />
-      <Club />
-      <Course openingHours={settings.openingHours} courseMap={settings.courseMap} />
+      <Club hours={settings.hours} />
+      <Course hours={settings.hours} courseMap={settings.courseMap} />
       <Gallery items={landingGallery} instagram={settings.instagram} instagramHref={instagramUrl(settings.instagram)} />
       <Location settings={settings} />
       <Faq whatsapp={settings.whatsapp} />

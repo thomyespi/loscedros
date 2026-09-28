@@ -1,3 +1,5 @@
+import type { OpeningHours } from "@/lib/hours";
+
 export type TournamentStatus = "borrador" | "proximo" | "en_curso" | "finalizado";
 export type Modality = "individual" | "four_ball" | "foursome";
 
@@ -87,7 +89,7 @@ export interface CourseMap {
 }
 
 export interface SiteSettings {
-  openingHours: string;
+  hours: OpeningHours;
   whatsapp: string;
   instagram: string;
   address: string;

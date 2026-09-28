@@ -2,7 +2,7 @@ import type { SiteSettings } from "@/lib/domain/types";
 
 /** Valores iniciales (los mismos que carga la migración). */
 export const DEFAULT_SETTINGS: SiteSettings = {
-  openingHours: "Todos los días de 9 a 19 h",
+  hours: { days: [3, 4, 5, 6, 7], opens: "10:00", closes: "16:30" },
   whatsapp: "5491139567637",
   instagram: "los_cedros_footgolf",
   address: "César Bacle 1500, B1614 Malvinas Argentinas, Buenos Aires",

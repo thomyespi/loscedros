@@ -222,10 +222,12 @@ export type Database = {
       site_settings: {
         Row: {
           id: number;
-          opening_hours: string;
           whatsapp: string;
           instagram: string;
           address: string;
+          open_days: number[];
+          opens_at: string;
+          closes_at: string;
           course_map_path: string | null;
           course_map_width: number | null;
           course_map_height: number | null;
@@ -233,10 +235,12 @@ export type Database = {
         };
         Insert: {
           id?: number;
-          opening_hours: string;
           whatsapp: string;
           instagram: string;
           address: string;
+          open_days?: number[];
+          opens_at?: string;
+          closes_at?: string;
           course_map_path?: string | null;
           course_map_width?: number | null;
           course_map_height?: number | null;
@@ -244,10 +248,12 @@ export type Database = {
         };
         Update: {
           id?: number;
-          opening_hours?: string;
           whatsapp?: string;
           instagram?: string;
           address?: string;
+          open_days?: number[];
+          opens_at?: string;
+          closes_at?: string;
           course_map_path?: string | null;
           course_map_width?: number | null;
           course_map_height?: number | null;

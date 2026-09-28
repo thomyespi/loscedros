@@ -3,6 +3,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import type { SiteSettings } from "@/lib/domain/types";
+import { formatHours } from "@/lib/hours";
 import { mapsDirectionsUrl, mapsEmbedUrl } from "@/lib/settings";
 
 export function Location({ settings }: { settings: SiteSettings }) {
@@ -35,7 +36,7 @@ export function Location({ settings }: { settings: SiteSettings }) {
             </span>
             <div>
               <p className="text-xs tracking-widest text-mist uppercase">Horarios</p>
-              <p className="text-lg font-semibold text-chalk">{settings.openingHours}</p>
+              <p className="text-lg font-semibold text-chalk">{formatHours(settings.hours)}</p>
             </div>
           </div>
           <div className="mt-auto flex flex-col gap-3">

@@ -1,4 +1,6 @@
 import type { Match, MatchResult, Photo, Round, SiteSettings, Team, Tournament } from "@/lib/domain/types";
+import { normalizeDays } from "@/lib/hours";
+import { DEFAULT_SETTINGS } from "@/lib/settings";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Tables = Database["public"]["Tables"];
@@ -61,7 +63,11 @@ export const toPhoto = (r: Row<"tournament_photos">): Photo => ({
 });
 
 export const toSettings = (r: Row<"site_settings">): SiteSettings => ({
-  openingHours: r.opening_hours,
+  // Postgres devuelve las horas como "10:00:00". Si la fila viene de un caché anterior a la
+  // migración del horario (sin estas columnas), se usa el horario por defecto.
+  hours: r.open_days
+    ? { days: normalizeDays(r.open_days), opens: r.opens_at.slice(0, 5), closes: r.closes_at.slice(0, 5) }
+    : DEFAULT_SETTINGS.hours,
   whatsapp: r.whatsapp,
   instagram: r.instagram,
   address: r.address,

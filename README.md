@@ -90,7 +90,7 @@ Abrí <http://localhost:3000>.
 
 | Qué | Dónde |
 | --- | --- |
-| Horarios, WhatsApp, Instagram, dirección | Panel → **Club** (sin tocar código) |
+| Horarios (días abiertos + hora de apertura y cierre; todos los textos de horario del sitio salen de acá), WhatsApp, Instagram, dirección | Panel → **Club** (sin tocar código) |
 | Textos de la landing (club, cancha, FAQ, modalidades, eventos) | `content/landing.ts` |
 | Fotos de la landing (hero, galería, secciones) | `content/media.ts` + archivos en `public/landing/` |
 | Logo | `components/brand/logo.tsx` y `app/icon.svg` |

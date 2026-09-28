@@ -35,7 +35,7 @@ export const club = {
   highlights: [
     { value: 18, suffix: "", label: "hoyos" },
     { value: 3, suffix: "", label: "modalidades de torneo" },
-    { value: 10, suffix: " h", label: "abierto cada día" },
+    // El tercer dato (días abiertos por semana) sale del horario configurado en el panel.
   ],
 };
 
@@ -46,7 +46,8 @@ export const course = {
     "Un recorrido completo con salidas largas, doglegs y greens que ponen a prueba tu precisión. Ideal para jugar una vuelta tranquila o salir a buscar el récord.",
   features: [
     { icon: "flag", title: "18 hoyos", text: "Recorrido completo, con hoyos para todos los niveles." },
-    { icon: "clock", title: "Abierto todos los días", text: "Vení cuando quieras dentro del horario; solo avisanos." },
+    // Título y texto salen del horario configurado en el panel (ver components/landing/course.tsx).
+    { icon: "clock", title: "", text: "" },
     { icon: "users", title: "Para todas las edades", text: "Chicos, grandes, amigos, familias y equipos." },
     { icon: "trophy", title: "Torneos por equipos", text: "Fechas durante todo el año con tabla y ranking histórico." },
   ],

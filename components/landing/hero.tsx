@@ -5,15 +5,16 @@ import { hero } from "@/content/landing";
 import { media } from "@/content/media";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import type { Spotlight } from "@/lib/data/selectors";
+import { formatHoursShort, type OpeningHours } from "@/lib/hours";
 
 export function Hero({
   whatsapp,
-  openingHours,
+  hours,
   spotlight,
   hasCourseMap,
 }: {
   whatsapp: string;
-  openingHours: string;
+  hours: OpeningHours;
   spotlight: Spotlight | null;
   hasCourseMap: boolean;
 }) {
@@ -121,7 +122,7 @@ export function Hero({
             </div>
             <div>
               <dt className="text-[0.65rem] tracking-[0.2em] text-mist uppercase">Horario</dt>
-              <dd>{compactHours(openingHours)}</dd>
+              <dd>{formatHoursShort(hours)}</dd>
             </div>
             <div className="col-span-2 sm:col-span-1">
               <dt className="text-[0.65rem] tracking-[0.2em] text-mist uppercase">Dónde</dt>
@@ -140,10 +141,4 @@ export function Hero({
       </a>
     </section>
   );
-}
-
-/** "Todos los días de 9 a 19 h" → "9–19 h" (si no reconoce el formato, lo deja como está). */
-function compactHours(text: string) {
-  const m = text.match(/(\d{1,2})(?::\d{2})?\s*(?:a|-|–)\s*(\d{1,2})(?::\d{2})?/);
-  return m ? `${m[1]}–${m[2]} h` : text;
 }

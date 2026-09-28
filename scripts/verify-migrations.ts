@@ -218,6 +218,14 @@ async function main() {
   champ === 1 ? ok("campeón y finished_at en null al reabrir") : fail("no se limpió el campeón");
   await expectError("whatsapp inválido", "update public.site_settings set whatsapp = '11-abc' where id = 1");
   await expectError("mapa fuera de la carpeta club/", "update public.site_settings set course_map_path = 'tournaments/x.webp' where id = 1");
+  const hours = await db.query<{ d: number[]; o: string; c: string }>("select open_days d, opens_at::text o, closes_at::text c from public.site_settings where id = 1");
+  const h = hours.rows[0];
+  h.d.join() === "3,4,5,6,7" && h.o === "10:00:00" && h.c === "16:30:00"
+    ? ok("horario inicial: miércoles a domingo, de 10 a 16:30")
+    : fail(`horario inicial inesperado: ${JSON.stringify(h)}`);
+  await expectError("horario sin días", "update public.site_settings set open_days = '{}' where id = 1");
+  await expectError("día fuera de rango", "update public.site_settings set open_days = '{0,3}' where id = 1");
+  await expectError("cierre antes de la apertura", "update public.site_settings set opens_at = '16:00', closes_at = '10:00' where id = 1");
   await expectOk("borrar torneo con cascada completa", `delete from public.tournaments where id = '${T2}'`);
   const leftovers = await count(`select count(*)::int n from public.rounds where tournament_id = '${T2}'`);
   leftovers === 0 ? ok("cascada eliminó fechas, cruces y resultados") : fail("quedaron fechas huérfanas");
