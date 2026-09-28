@@ -1,8 +1,8 @@
 /**
  * Índice único de las imágenes de la landing. Los archivos viven en /public/landing/
  * y son parte del sitio (no de la base). Para cambiar una: reemplazá el archivo con el
- * mismo nombre, o cambiá acá `file`, dimensiones y `alt`. Las fotos propias del club
- * van sin `credit`; /creditos lista solo las que lo tienen.
+ * mismo nombre, o cambiá acá `file`, dimensiones y `alt`. `credit` registra de dónde
+ * sale cada foto de muestra (no se muestra en el sitio); las fotos propias van sin él.
  */
 export interface SiteImage {
   src: string;
@@ -94,7 +94,3 @@ export const landingGallery: SiteImage[] = [
   media.playersMountains,
   media.flag9,
 ];
-
-export const allCredits = Object.values(media).flatMap((m) =>
-  m.credit ? [{ file: m.src, ...m.credit }] : [],
-);

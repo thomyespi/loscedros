@@ -40,11 +40,11 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero whatsapp={settings.whatsapp} openingHours={settings.openingHours} spotlight={spotlight} />
+      <Hero whatsapp={settings.whatsapp} openingHours={settings.openingHours} spotlight={spotlight} hasCourseMap={!!settings.courseMap} />
       <Marquee />
       <WhatIs />
-      <Club stats={{ teams: historical.length, tournaments: snap.tournaments.length }} />
-      <Course openingHours={settings.openingHours} />
+      <Club />
+      <Course openingHours={settings.openingHours} courseMap={settings.courseMap} />
       <Gallery items={landingGallery} instagram={settings.instagram} instagramHref={instagramUrl(settings.instagram)} />
       <Location settings={settings} />
       <Faq whatsapp={settings.whatsapp} />

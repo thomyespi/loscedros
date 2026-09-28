@@ -6,6 +6,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   whatsapp: "5491139567637",
   instagram: "los_cedros_footgolf",
   address: "César Bacle 1500, B1614 Malvinas Argentinas, Buenos Aires",
+  courseMap: null,
 };
 
 export const instagramUrl = (user: string) => `https://www.instagram.com/${user}/`;

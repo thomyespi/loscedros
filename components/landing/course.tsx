@@ -4,10 +4,14 @@ import { Reveal } from "@/components/motion/reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { course } from "@/content/landing";
 import { media } from "@/content/media";
+import type { CourseMap as CourseMapData } from "@/lib/domain/types";
+import { mediaUrl } from "@/lib/storage";
+import { CourseMap } from "./course-map";
 
 const ICONS = { flag: Flag, clock: Clock, users: Users, trophy: Trophy } as const;
 
-export function Course({ openingHours }: { openingHours: string }) {
+export function Course({ openingHours, courseMap }: { openingHours: string; courseMap: CourseMapData | null }) {
+  const mapSrc = courseMap ? mediaUrl(courseMap.path) : null;
   return (
     <section id="cancha" className="scroll-mt-24 py-20 sm:py-28">
       <div className="container-page">
@@ -51,6 +55,8 @@ export function Course({ openingHours }: { openingHours: string }) {
             );
           })}
         </ul>
+
+        {courseMap && mapSrc && <CourseMap src={mapSrc} width={courseMap.width} height={courseMap.height} />}
       </div>
     </section>
   );

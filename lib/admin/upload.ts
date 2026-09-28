@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { fail, ok, type ActionResult } from "@/lib/admin/result";
 import { STORAGE_BUCKETS } from "@/lib/config";
 
-const FOLDER = /^(teams|tournaments)\/[\w-]+$/;
+const FOLDER = /^(?:(?:teams|tournaments)\/[\w-]+|club)$/;
 const MAX_BYTES = 1.9 * 1024 * 1024;
 
 function randomId() {

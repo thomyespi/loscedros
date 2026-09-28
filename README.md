@@ -98,7 +98,7 @@ Abrí <http://localhost:3000>.
 
 ### Imágenes de la landing
 
-Las imágenes de la landing son parte del sitio (código), no de la base: viven en `public/landing/` y se declaran en un único índice, `content/media.ts`. La base y Storage guardan solo lo que carga el admin (avatares de equipos, portadas y fotos de torneos, que se ven en la pestaña **Fotos** de cada torneo).
+Las imágenes de la landing son parte del sitio (código), no de la base: viven en `public/landing/` y se declaran en un único índice, `content/media.ts`. La base y Storage guardan solo lo que carga el admin (avatares de equipos, portadas y fotos de torneos, que se ven en la pestaña **Fotos** de cada torneo, y el mapa de la cancha).
 
 | Imagen (`content/media.ts`) | Dónde se ve | Archivo |
 | --- | --- | --- |
@@ -117,8 +117,10 @@ Las imágenes de la landing son parte del sitio (código), no de la base: viven 
 
 - **Mismo nombre:** reemplazá el archivo en `public/landing/` por tu foto (idealmente WebP, 1600–1920 px de ancho). Si cambia la proporción, actualizá `width` y `height` en `content/media.ts`.
 - **Otro archivo:** copialo a `public/landing/` y en `content/media.ts` cambiá el nombre, `width`, `height` y `alt`.
-- Si la foto es del club, borrá su `credit`: `/creditos` lista solo las imágenes que lo tienen. Las fotos de muestra actuales son de Wikimedia Commons (licencias CC). Cuando no quede ninguna con crédito, podés sacar la página `app/(public)/creditos` y su link en el footer.
+- Si la foto es del club, borrá su `credit`. Las fotos de muestra actuales son de Wikimedia Commons (licencias CC) y se van a reemplazar por fotos propias; `credit` solo registra de dónde salen, el sitio no tiene página de créditos.
 - El orden de la galería se define en `landingGallery` (mismo archivo).
+
+**Excepción: el mapa de la cancha.** El mapa del momento no está en `public/landing/`. Lo sube el admin desde **Datos del club** (`/vestuario/club`) y se guarda en Storage (`tournament-media/club/`). Se ve en "La cancha" (`#mapa`) y, mientras haya uno cargado, el inicio muestra el atajo "Ver mapa de la cancha". Al reemplazarlo o quitarlo, el archivo anterior se borra.
 
 > ⚠️ Los textos del club y de la cancha en `content/landing.ts` son **provisorios**: revisalos con Los Cedros.
 

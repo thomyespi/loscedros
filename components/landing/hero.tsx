@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, Map as MapIcon } from "lucide-react";
 import { getImageProps } from "next/image";
 import Link from "next/link";
 import { hero } from "@/content/landing";
@@ -6,7 +6,17 @@ import { media } from "@/content/media";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import type { Spotlight } from "@/lib/data/selectors";
 
-export function Hero({ whatsapp, openingHours, spotlight }: { whatsapp: string; openingHours: string; spotlight: Spotlight | null }) {
+export function Hero({
+  whatsapp,
+  openingHours,
+  spotlight,
+  hasCourseMap,
+}: {
+  whatsapp: string;
+  openingHours: string;
+  spotlight: Spotlight | null;
+  hasCourseMap: boolean;
+}) {
   const common = { alt: media.hero.alt, sizes: "100vw" };
   const { props: { srcSet: desktop } } = getImageProps({
     ...common,
@@ -26,8 +36,9 @@ export function Hero({ whatsapp, openingHours, spotlight }: { whatsapp: string; 
   const live = spotlight && spotlight.kind !== "champion" ? spotlight : null;
 
   return (
-    <section className="relative isolate flex min-h-[100svh] items-end overflow-hidden lg:min-h-[92vh] lg:items-center">
-      <picture className="absolute inset-0 -z-20">
+    <section className="relative isolate flex min-h-svh items-end overflow-hidden lg:min-h-[92vh] lg:items-center">
+      {/* En desktop la foto ocupa la derecha para que el jugador no quede detrás del texto. */}
+      <picture className="absolute inset-0 -z-20 lg:left-[32%]">
         <source media="(min-width: 768px)" srcSet={desktop} />
         <source srcSet={mobile} />
         <img
@@ -39,12 +50,17 @@ export function Hero({ whatsapp, openingHours, spotlight }: { whatsapp: string; 
         />
       </picture>
       {/* Overlays para legibilidad */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-night via-night/55 to-night/10" aria-hidden />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-night/70 via-transparent to-transparent max-lg:hidden" aria-hidden />
+      <div className="absolute inset-0 -z-10 bg-linear-to-t from-night via-night/55 to-night/10 lg:via-night/20 lg:to-transparent" aria-hidden />
+      <div
+        className="absolute inset-y-0 left-[32%] -z-10 w-[16%] -translate-x-px bg-linear-to-r from-night via-night/50 to-transparent max-lg:hidden"
+        aria-hidden
+      />
+      <div className="absolute inset-y-0 left-0 -z-10 w-[32%] bg-night max-lg:hidden" aria-hidden />
       <div className="grain absolute inset-0 -z-10" aria-hidden />
 
-      <div className="container-page pt-28 pb-10 lg:pb-0">
-        <div className="max-w-3xl">
+      {/* En desktop el texto se alinea al borde izquierdo (no al contenedor centrado) para dejarle más lugar a la foto. */}
+      <div className="container-page pt-28 pb-14 lg:max-w-none lg:px-12 lg:pb-20 xl:px-16">
+        <div className="max-w-3xl lg:max-w-[min(46%,44rem)]">
           {live ? (
             <Link
               href={`/torneos/${live.view.tournament.slug}`}
@@ -63,7 +79,7 @@ export function Hero({ whatsapp, openingHours, spotlight }: { whatsapp: string; 
             </p>
           )}
 
-          <h1 className="font-display text-[clamp(4.2rem,21vw,10.5rem)] text-chalk">
+          <h1 className="font-display text-[clamp(4.2rem,21vw,10.5rem)] text-chalk lg:text-[clamp(5rem,8.5vw,9rem)]">
             <span className="animate-in fade-in slide-in-from-bottom-6 fill-mode-both block duration-700">{hero.titleTop}</span>
             <span className="animate-in fade-in slide-in-from-bottom-6 fill-mode-both text-gradient-grass block delay-150 duration-700">
               {hero.titleBottom}
@@ -87,18 +103,29 @@ export function Hero({ whatsapp, openingHours, spotlight }: { whatsapp: string; 
             </WhatsAppButton>
           </div>
 
-          <dl className="animate-in fade-in fill-mode-both mt-10 grid grid-cols-3 gap-2 border-t border-white/15 pt-5 delay-700 duration-1000 sm:max-w-lg">
+          {hasCourseMap && (
+            <a
+              href="#mapa"
+              className="animate-in fade-in fill-mode-both mt-4 inline-flex h-11 items-center gap-2 text-sm font-semibold text-chalk/85 underline-offset-4 transition delay-500 duration-700 hover:text-grass hover:underline"
+            >
+              <MapIcon className="size-4 text-grass" />
+              Ver mapa de la cancha
+            </a>
+          )}
+
+          {/* En celular "Dónde" va en su propia fila para que "Malvinas Argentinas" entre en una línea. */}
+          <dl className="animate-in fade-in fill-mode-both mt-10 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-white/15 pt-5 delay-700 duration-1000 sm:w-max sm:grid-cols-[auto_auto_auto] sm:gap-x-10 [&_dd]:font-display [&_dd]:text-3xl [&_dd]:whitespace-nowrap [&_dd]:text-chalk lg:[&_dd]:text-2xl xl:[&_dd]:text-3xl">
             <div>
               <dt className="text-[0.65rem] tracking-[0.2em] text-mist uppercase">Hoyos</dt>
-              <dd className="font-display text-3xl text-chalk">18</dd>
+              <dd>18</dd>
             </div>
             <div>
               <dt className="text-[0.65rem] tracking-[0.2em] text-mist uppercase">Horario</dt>
-              <dd className="font-display text-3xl text-chalk">{compactHours(openingHours)}</dd>
+              <dd>{compactHours(openingHours)}</dd>
             </div>
-            <div>
+            <div className="col-span-2 sm:col-span-1">
               <dt className="text-[0.65rem] tracking-[0.2em] text-mist uppercase">Dónde</dt>
-              <dd className="font-display text-3xl leading-none text-chalk">Malvinas</dd>
+              <dd>Malvinas Argentinas</dd>
             </div>
           </dl>
         </div>
@@ -107,7 +134,7 @@ export function Hero({ whatsapp, openingHours, spotlight }: { whatsapp: string; 
       <a
         href="#que-es"
         aria-label="Bajar"
-        className="animate-float absolute bottom-8 left-1/2 hidden -translate-x-1/2 text-chalk/70 transition hover:text-grass lg:block"
+        className="animate-float absolute bottom-10 left-1/2 hidden -translate-x-1/2 text-chalk/70 transition hover:text-grass lg:block"
       >
         <ChevronDown className="size-7" />
       </a>

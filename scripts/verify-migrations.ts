@@ -119,6 +119,10 @@ async function main() {
     (await db.query("update public.site_settings set whatsapp = '5491100000000' where id = 1 returning id")).rows.length,
   ).catch(() => 0);
   changed === 0 ? ok("anon: update de settings no afecta filas") : fail("anon modificó settings");
+  const mapChanged = await as("anon", async () =>
+    (await db.query("update public.site_settings set course_map_path = 'club/x.webp' where id = 1 returning id")).rows.length,
+  ).catch(() => 0);
+  mapChanged === 0 ? ok("anon: no puede cambiar el mapa de la cancha") : fail("anon modificó el mapa");
   await expectOk("admin puede insertar equipos", "insert into public.teams (name, slug) values ('Equipo Test', 'equipo-test')", "admin");
   await expectOk(
     "admin puede subir archivos a storage",
@@ -213,6 +217,7 @@ async function main() {
   );
   champ === 1 ? ok("campeón y finished_at en null al reabrir") : fail("no se limpió el campeón");
   await expectError("whatsapp inválido", "update public.site_settings set whatsapp = '11-abc' where id = 1");
+  await expectError("mapa fuera de la carpeta club/", "update public.site_settings set course_map_path = 'tournaments/x.webp' where id = 1");
   await expectOk("borrar torneo con cascada completa", `delete from public.tournaments where id = '${T2}'`);
   const leftovers = await count(`select count(*)::int n from public.rounds where tournament_id = '${T2}'`);
   leftovers === 0 ? ok("cascada eliminó fechas, cruces y resultados") : fail("quedaron fechas huérfanas");

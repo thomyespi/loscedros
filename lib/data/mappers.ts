@@ -65,6 +65,10 @@ export const toSettings = (r: Row<"site_settings">): SiteSettings => ({
   whatsapp: r.whatsapp,
   instagram: r.instagram,
   address: r.address,
+  courseMap:
+    r.course_map_path && r.course_map_width && r.course_map_height
+      ? { path: r.course_map_path, width: r.course_map_width, height: r.course_map_height }
+      : null,
 });
 
 /** Agrupa tournament_teams por torneo. */

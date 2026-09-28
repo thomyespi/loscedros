@@ -35,11 +35,11 @@ export async function cropToWebp(src: string, area: PixelArea, size = 512) {
   return blob;
 }
 
-/** Comprime una foto (lado mayor ≤ maxSide) a WebP y devuelve también sus dimensiones. */
-export async function compressPhoto(file: File, maxSide = 1920) {
+/** Comprime una foto (lado mayor ≤ maxSide, peso ≤ maxSizeMB) a WebP y devuelve también sus dimensiones. */
+export async function compressPhoto(file: File, maxSide = 1920, maxSizeMB = 1.2) {
   const compressed = await imageCompression(file, {
     maxWidthOrHeight: maxSide,
-    maxSizeMB: 1.2,
+    maxSizeMB,
     fileType: "image/webp",
     initialQuality: 0.8,
     useWebWorker: true,

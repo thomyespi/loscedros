@@ -226,6 +226,9 @@ export type Database = {
           whatsapp: string;
           instagram: string;
           address: string;
+          course_map_path: string | null;
+          course_map_width: number | null;
+          course_map_height: number | null;
           updated_at: string;
         };
         Insert: {
@@ -234,6 +237,9 @@ export type Database = {
           whatsapp: string;
           instagram: string;
           address: string;
+          course_map_path?: string | null;
+          course_map_width?: number | null;
+          course_map_height?: number | null;
           updated_at?: string;
         };
         Update: {
@@ -242,6 +248,9 @@ export type Database = {
           whatsapp?: string;
           instagram?: string;
           address?: string;
+          course_map_path?: string | null;
+          course_map_width?: number | null;
+          course_map_height?: number | null;
           updated_at?: string;
         };
         Relationships: [];

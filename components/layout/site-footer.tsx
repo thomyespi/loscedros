@@ -1,4 +1,4 @@
-import { Clock, MapPin } from "lucide-react";
+import { ArrowUpRight, Clock, MapPin } from "lucide-react";
 import Link from "next/link";
 import { InstagramIcon, WhatsAppIcon } from "@/components/brand/icons";
 import { Logo } from "@/components/brand/logo";
@@ -12,7 +12,7 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
     <footer className="grain relative mt-24 overflow-hidden border-t border-white/8 bg-pitch">
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-10 left-1/2 -translate-x-1/2 font-display text-[28vw] leading-none whitespace-nowrap text-white/[0.03] select-none lg:text-[18rem]"
+        className="pointer-events-none absolute -bottom-10 left-1/2 -translate-x-1/2 font-display text-[28vw] leading-none whitespace-nowrap text-white/3 select-none lg:text-[18rem]"
       >
         Los Cedros
       </div>
@@ -78,9 +78,17 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
           <Link href="/#preguntas" className="text-mist transition hover:text-chalk">Preguntas frecuentes</Link>
         </div>
       </div>
-      <div className="container-page relative flex flex-col gap-2 border-t border-white/8 py-6 text-xs text-mist/70 sm:flex-row sm:justify-between">
+      <div className="container-page relative flex flex-col gap-4 border-t border-white/8 py-6 text-xs text-mist/70 sm:flex-row sm:items-center sm:justify-between">
         <p>© {year} Los Cedros Footgolf · Malvinas Argentinas, Buenos Aires</p>
-        <Link href="/creditos" className="transition hover:text-chalk">Créditos de fotos</Link>
+        <a
+          href="https://gen12software.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group inline-flex min-h-11 w-fit items-center gap-2 rounded-full border border-white/12 bg-white/3 px-4 text-sm text-mist transition hover:border-grass/60 hover:text-chalk"
+        >
+          Sitio hecho por <span className="font-semibold text-chalk group-hover:text-grass">Gen12 Software</span>
+          <ArrowUpRight className="size-4 text-grass transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        </a>
       </div>
     </footer>
   );

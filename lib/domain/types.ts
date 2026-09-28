@@ -80,11 +80,19 @@ export interface Photo {
   createdAt: string;
 }
 
+export interface CourseMap {
+  path: string;
+  width: number;
+  height: number;
+}
+
 export interface SiteSettings {
   openingHours: string;
   whatsapp: string;
   instagram: string;
   address: string;
+  /** Mapa del momento de la cancha (Storage). null si el admin no cargó ninguno. */
+  courseMap: CourseMap | null;
 }
 
 /** Todo lo público del sitio en una sola lectura (el volumen del club es chico). */

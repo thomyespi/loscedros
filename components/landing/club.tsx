@@ -5,12 +5,7 @@ import { SectionHeading } from "@/components/section-heading";
 import { club } from "@/content/landing";
 import { media } from "@/content/media";
 
-export function Club({ stats }: { stats: { teams: number; tournaments: number } }) {
-  const highlights = [
-    ...club.highlights,
-    ...(stats.teams > 0 ? [{ value: stats.teams, suffix: "", label: "equipos en el ranking" }] : []),
-  ].slice(0, 4);
-
+export function Club() {
   return (
     <section id="club" className="relative scroll-mt-24 overflow-hidden bg-pitch py-20 sm:py-28">
       <div aria-hidden className="pointer-events-none absolute -top-40 -left-40 size-[28rem] rounded-full bg-cedar/10 blur-3xl" />
@@ -39,10 +34,10 @@ export function Club({ stats }: { stats: { teams: number; tournaments: number } 
               <p className="text-lg text-pretty text-mist">{p}</p>
             </Reveal>
           ))}
-          <dl className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-            {highlights.map((h, i) => (
+          <dl className="mt-2 grid grid-cols-3 gap-3">
+            {club.highlights.map((h, i) => (
               <Reveal key={h.label} delay={i * 0.08} className="rounded-2xl border border-white/10 bg-night/50 p-4">
-                <dd className="font-display tabular text-5xl text-chalk">
+                <dd className="font-display tabular text-4xl text-chalk sm:text-5xl">
                   <CountUp to={h.value} />
                   {h.suffix}
                 </dd>

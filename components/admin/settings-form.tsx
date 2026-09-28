@@ -10,23 +10,25 @@ import { formatPhone } from "@/lib/settings";
 import { settingsSchema } from "@/lib/validation";
 import { Card, Field, StickyActions, btn, inputClass } from "./ui";
 
-type Errors = Partial<Record<keyof SiteSettings, string>>;
+/** Solo los campos de texto: el mapa se guarda aparte, desde su propia tarjeta. */
+type ClubInfo = Omit<SiteSettings, "courseMap">;
+type Errors = Partial<Record<keyof ClubInfo, string>>;
 
-export function SettingsForm({ initial }: { initial: SiteSettings }) {
+export function SettingsForm({ initial }: { initial: ClubInfo }) {
   const router = useRouter();
   const [values, setValues] = useState(initial);
   const [errors, setErrors] = useState<Errors>({});
   const [saving, startTransition] = useTransition();
-  const dirty = (Object.keys(initial) as (keyof SiteSettings)[]).some((k) => values[k] !== initial[k]);
+  const dirty = (Object.keys(initial) as (keyof ClubInfo)[]).some((k) => values[k] !== initial[k]);
 
-  const set = (k: keyof SiteSettings) => (e: React.ChangeEvent<HTMLInputElement>) => setValues((v) => ({ ...v, [k]: e.target.value }));
+  const set = (k: keyof ClubInfo) => (e: React.ChangeEvent<HTMLInputElement>) => setValues((v) => ({ ...v, [k]: e.target.value }));
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const parsed = settingsSchema.safeParse(values);
     if (!parsed.success) {
       const errs: Errors = {};
-      for (const issue of parsed.error.issues) errs[issue.path[0] as keyof SiteSettings] ??= issue.message;
+      for (const issue of parsed.error.issues) errs[issue.path[0] as keyof ClubInfo] ??= issue.message;
       setErrors(errs);
       return;
     }

@@ -13,7 +13,7 @@ export function Marquee() {
     </div>
   );
   return (
-    <div className="relative -mt-3 -rotate-1 overflow-hidden bg-grass py-3 shadow-[0_20px_40px_-20px_rgb(155_226_45/0.5)]">
+    <div className="relative -rotate-1 overflow-hidden bg-grass py-3 shadow-[0_20px_40px_-20px_rgb(155_226_45/0.5)]">
       <p className="sr-only">{WORDS.join(" · ")}</p>
       <div className="animate-marquee flex w-max">
         {row}
